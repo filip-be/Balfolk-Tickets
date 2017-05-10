@@ -3,7 +3,7 @@
 /* Include / remove events tab
  */
  
- class BFT_Event {
+class BFT_EventTab {
 	 /**
 	 * Singleton instance
 	 */
@@ -76,28 +76,46 @@
 	
 	function _events_page()
 	{
-		// check user capabilities
+		// Check user capabilities
 		if (!current_user_can('view_woocommerce_reports')) {
-			return;
+			wp_die( __('You do not have sufficient permissions to access this page.') );
 		}
-		?>
+
+		// Variable for the fields
+		$hidden_field_name = 'bft_events_tab_hidden_submit';
+		$data_field_name = 'bft_event_name';
+
+		// See if the user has posted us some information
+		// If they did, this hidden field will be set to 'Y'
+		if( isset($_POST[ $hidden_field_name ]) && $_POST[ $hidden_field_name ] == 'Y' ) {
+			// Read their posted value
+			$event_name = $_POST[$data_field_name];
+
+			// Create new event
+			
+			// Put a "settings saved" message on the screen
+			?><div class="updated"><p><strong><?php _e('Event added.', 'bft_event' ); ?></strong></p></div><?php
+		}
+
+		// Now display the settings editing screen?>
 		<div class="wrap">
 			<h1><?= esc_html(get_admin_page_title()); ?></h1>
-			<form action="options.php" method="post">
-				<?php
-				// output security fields for the registered setting "wporg_options"
-				//settings_fields('wporg_options');
-				// output setting sections and their fields
-				// (sections are registered for "wporg", each field is registered to a specific section)
-				//do_settings_sections('wporg');
-				// output save settings button
-				submit_button('Save Settings');
-				?>
+			<form name="New_Event" method="POST" action="">
+				<input type="hidden" name="<?php echo $hidden_field_name; ?>" value="Y">
+				<p>
+					<?php _e("Event name:", 'menu-test' ); ?> 
+					<input type="text" name="<?php echo $data_field_name; ?>" value="" size="20">
+					<input type="submit" name="Submit" class="button-primary" value="Add new event" />
+				</p>
 			</form>
+			<hr />
+			<?// Display existing events - EDIT / REMOVE
+				
+			?>
 		</div>
 		<?php
 	}
  }
  
  // Instantiate Balfolk tickets events tab class
-$BFT_Event = BFT_Event::getInstance();
+$BFT_EventTab = BFT_EventTab::getInstance();

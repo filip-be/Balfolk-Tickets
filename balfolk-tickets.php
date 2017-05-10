@@ -3,7 +3,7 @@
 Plugin Name: Balfolk Tickets
 Plugin URI:  https://github.com/filip-be/Balfolk-Tickets
 Description: WordPress ticketing plugin for balfolk events
-Version:     0.3.0
+Version:     0.4.1
 Author:      Filip Bieleszuk
 Author URI:  https://github.com/filip-be
 License:     GPL3
@@ -68,15 +68,17 @@ class BFT
 		return self::$instance;
 	}
 	
+	public static $classesDir;
+	public static $pluginDir;
 	/**
 	 * Load additional classes
 	 */
 	protected static function loadClasses($classesDir, $classes) {
-		$pluginDir = trailingslashit(plugin_dir_path(__FILE__));
-		$classesDir = trailingslashit($classesDir);
+		self::$pluginDir = trailingslashit(plugin_dir_path(__FILE__));
+		self::$classesDir = trailingslashit($classesDir);
 		
 		foreach($classes as $class) {
-			require_once($pluginDir.$classesDir.$class);
+			require_once(self::$pluginDir.self::$classesDir.$class);
 		}
 		register_activation_hook(__FILE__, array('BFT_database', '_create_bft_tables'));
 	}
