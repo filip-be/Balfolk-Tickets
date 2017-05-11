@@ -5,6 +5,8 @@
 require_once 'table.php';
 
 class BFT_Status extends BFT_Table {
+	public static $Enabled = 1;
+	public static $Disabled = 2;
 	
 	public function __construct()
 	{
@@ -30,8 +32,8 @@ class BFT_Status extends BFT_Table {
 	{
 		global $wpdb;
 		$statuses = array(
-			["PK" => 1, "Name" => "Enabled"],
-			["PK" => 2, "Name" => "Disabled"]
+			["PK" => self::$Enabled, "Name" => "Enabled"],
+			["PK" => self::$Disabled, "Name" => "Disabled"]
 		);
 		
 		// change to OO
