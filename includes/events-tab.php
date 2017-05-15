@@ -3,6 +3,7 @@
 /* Include / remove events tab
  */
 require_once 'event.php';
+require_once 'event-tickets-list.php';
  
 class BFT_EventTab {
 	 /**
@@ -205,7 +206,19 @@ class BFT_EventTab {
 			</form>
 			<hr />
 			<?// Display existing events - EDIT / REMOVE
-				
+				$EventTickets = new BFT_Event_Tickets_List();
+				$EventTickets->prepare_items($EventID, false);
+				$EventTickets->display();
+				// $args = array( 'post_type' => 'product', 'posts_per_page' => 10 );
+				// $loop = new WP_Query( $args );
+
+				// while ( $loop->have_posts() ) : $loop->the_post(); 
+					// global $product; 
+					// echo '<br /><a href="'.get_permalink().'">' . woocommerce_get_product_thumbnail().' '.get_the_title().'</a>';
+				// endwhile; 
+
+
+				// wp_reset_query(); 
 			?>
 		</div>
 		<?php
