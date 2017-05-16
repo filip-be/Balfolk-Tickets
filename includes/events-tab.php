@@ -3,6 +3,7 @@
 /* Include / remove events tab
  */
 require_once 'event.php';
+require_once 'events-list.php';
 require_once 'event-tickets-list.php';
  
 class BFT_EventTab {
@@ -53,36 +54,61 @@ class BFT_EventTab {
 			21
 		);
 		
-		add_submenu_page(
-			'balfolk-events'
-			,'Edit event'
-			,null
-			,'view_woocommerce_reports'
-			,'balfolk-event'
-			,array( __CLASS__, '_event_page')
-		);
-
-		// // reports menu item
-		// self::$menu_page_hooks['main'] = add_submenu_page(
-			// self::$menu_slugs['main'],
-			// __( 'Reports', 'opentickets-community-edition' ),
-			// __( 'Reports', 'opentickets-community-edition' ),
-			// 'view_woocommerce_reports',
-			// self::$menu_slugs['main'],
-			// array( __CLASS__, 'ap_reports_page' ),
-			// false,
-			// 21
+		// add_submenu_page(
+			// 'balfolk-events'
+			// ,'Edit event'
+			// ,null
+			// ,'view_woocommerce_reports'
+			// ,'balfolk-event'
+			// ,array( __CLASS__, '_event_page')
 		// );
-
-		// // settings menu item
-		// self::$menu_page_hooks['settings'] = add_submenu_page(
-			// self::$menu_slugs['main'],
-			// __( 'Settings', 'opentickets-community-edition' ),
-			// __( 'Settings', 'opentickets-community-edition' ),
-			// 'manage_options',
-			// self::$menu_slugs['settings'],
-			// array( __CLASS__, 'ap_settings_page' )
-		// );
+	}
+	
+	public static function _process_request_actions($field_event_name) {
+		if( isset($_POST[$field_event_name]) && strlen($_POST[$field_event_name]) > 0) {
+			// Create new event
+			BFT_Event::Create($_POST[$field_event_name]);
+			
+			// Put a "event added" message on the screen
+			?><div class="updated"><p><strong><?php _e('Event added.', 'bft_event' ); ?></strong></p></div><?php
+		}
+		
+		// Single event archived
+		if(isset($_GET['action'])
+			&& $_GET['action'] == 'event-archive'
+			&& isset($_GET['event'])
+			&& isset($_GET['_wpnonce'])
+			&& wp_verify_nonce(esc_attr($_GET['_wpnonce']), 'bft_archive_event')) {
+			BFT_Event::Archive($_GET['event']);
+			?><div class="updated"><p><strong><?php _e('Event archived.', 'bft_event' ); ?></strong></p></div><?php
+		}
+		// Single event restored
+		if(isset($_GET['action'])
+			&& $_GET['action'] == 'event-restore'
+			&& isset($_GET['event'])
+			&& isset($_GET['_wpnonce'])
+			&& wp_verify_nonce(esc_attr($_GET['_wpnonce']), 'bft_restore_event')) {
+			BFT_Event::Restore($_GET['event']);
+			?><div class="updated"><p><strong><?php _e('Event restored.', 'bft_event' ); ?></strong></p></div><?php
+		}
+		// Bulk event archive
+		if(isset($_POST['action'])
+			&& $_POST['action'] == 'bulk-event-archive'
+			&& isset($_POST['bulk-event-archive'])) {
+			foreach($_POST['bulk-event-archive'] as $eventID) {
+				BFT_Event::Archive($eventID);
+			}
+			?><div class="updated"><p><strong><?php _e('Events archived.', 'bft_event' ); ?></strong></p></div><?php
+		}
+		// Bulk event restore
+		if(isset($_POST['action'])
+			&& $_POST['action'] == 'bulk-event-restore'
+			&& isset($_POST['bulk-event-archive'])) {
+			foreach($_POST['bulk-event-archive'] as $eventID) {
+				BFT_Event::Restore($eventID);
+			}
+			?><div class="updated"><p><strong><?php _e('Events restored.', 'bft_event' ); ?></strong></p></div><?php
+		}
 	}
 	
 	public static function _events_page()
@@ -92,23 +118,24 @@ class BFT_EventTab {
 			wp_die( __('You do not have sufficient permissions to access this page.') );
 		}
 		
+		// Process POST/GET actions
 		$field_event_name = 'bft_event_name';
-		if( isset($_POST[$field_event_name]) && strlen($_POST[$field_event_name]) > 0) {
-			// Create new event
-			BFT_Event::Create($_POST[$field_event_name]);
-			
-			// Put a "settings saved" message on the screen
-			?><div class="updated"><p><strong><?php _e('Event added.', 'bft_event' ); ?></strong></p></div><?php
+		self::_process_request_actions($field_event_name);
+		
+		if(isset($_GET['action'])
+			&& $_GET['action'] == 'event-edit'
+			&& isset($_GET['event']))
+		{
+			self::print_event_page($_GET['event']);
 		}
-		else if( isset($_POST['ArchiveEventID']) && strlen($_POST['ArchiveEventID']) > 0) {
-			// Archive (disable) event
-			BFT_Event::Archive($_POST['ArchiveEventID']);
-			
-			// Put a "settings saved" message on the screen
-			?><div class="updated"><p><strong><?php _e('Event archived.', 'bft_event' ); ?></strong></p></div><?php
+		else
+		{
+			self::print_events_page();
 		}
-
-		// Now display the settings editing screen?>
+	}
+	
+	public static function print_events_page() {
+		?>
 		<div class="wrap">
 			<h1><?= esc_html(get_admin_page_title()); ?></h1>
 			<form name="New_Event" method="POST" action="">
@@ -119,61 +146,29 @@ class BFT_EventTab {
 				</p>
 			</form>
 			<hr />
-		<?php
-			$events = BFT_Event::GetEvents();
-			if(isset($events) && sizeof($events) > 0)
-			{ 
-		?>
-				<table class="tab-events">
-					<thead>
-						<tr>
-							<td>Manage events</td>
-							<td></td>
-							<td></td>
-						</tr>
-					</thead>
-					<tbody>
-				<?	// Display existing events - EDIT / Archive
-					foreach($events as $event)
-					{ 
-				?>
-						<tr>
-							<td><?= $event->Name; ?></td>
-							<td>
-								<form name="Edit_Event" method="POST" action="<?= menu_page_url('balfolk-event', false); ?>">
-									<input type="hidden" name="EventID" value="<?= $event->ID; ?>"/>
-									<input type="submit" class="button-secondary" value="Edit event"/>
-								</form>
-							</td>
-							<td>
-								<form name="Edit_Event" method="POST" action="">
-									<input type="hidden" name="ArchiveEventID" value="<?= $event->ID; ?>"/>
-									<input type="submit" class="button-primary bft-archive-event" value="Archive event"/>
-								</form>
-							</td>
-						</tr>
-				<?
-					}
-				?>
-					</tbody>
-				</table>
-				<div id="confirmation-dialog"></div>
-				<script>
-					jQuery(".bft-archive-event").on("click", function() {
-						return confirm("Do you really want to delete this event?");
-					});
-				</script>
-		<?php
-			}
-			else
-			{
-				echo "<p>There is no events yet. Please create new event using field above.</p>";
-			}
-		?>
+			<form name="events-edit" method="POST" action="">
+			<?php
+				$FilterStatus = 1;
+				if(isset($_POST["events-filter-action"])
+					&& $_POST["events-filter-action"] == 'Filter'
+					&& isset($_POST["events-filter"])) {
+					$FilterStatus = $_POST["events-filter"];
+				}
+				
+				$events_list = new BFT_Events_List($FilterStatus);
+				$events_list->prepare_items();
+				$events_list->display();
+			?>
+			</form>
 		</div>
 		<?php
 	}
 	
+	public static function print_event_page($eventID) {
+		// NOT IMPLEMENTED YET
+	}
+	
+	// OLD FUNCTION - TO REMOVE
 	public static function _event_page()
 	{
 		// Check user capabilities

@@ -57,6 +57,20 @@ class BFT_Event extends BFT_Table {
 		BFT_Log::Info(__CLASS__, sprintf('Event archived. ID: %d, Name: %s, User: %s', $event->ID, $event->Name, wp_get_current_user()->user_login));
 	}
 	
+	public static function Restore($_ID)
+	{
+		global $wpdb;
+		$wpdb->update(
+			$wpdb->prefix . self::$tab_name
+			,array('Status' => BFT_Status::$Enabled)
+			,array('PK_ID' => $_ID)
+			,array('%d')
+			,array('%d')
+		);
+		$event = self::GetByID($_ID);
+		BFT_Log::Info(__CLASS__, sprintf('Event restored. ID: %d, Name: %s, User: %s', $event->ID, $event->Name, wp_get_current_user()->user_login));
+	}
+	
 	public static function GetByID($event_id)
 	{
 		global $wpdb;

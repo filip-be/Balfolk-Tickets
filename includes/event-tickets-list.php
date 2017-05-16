@@ -17,12 +17,11 @@ class BFT_Event_Tickets_List extends WP_List_Table {
 			'plural'   => __( 'Tickets', 'sp' ), //plural name of the listed records
 			'ajax'     => false //does this table support ajax?
 		] );
-
 	}
 
 	public static function get_event_query( $event_id = 0, $event_tickets_only = false ) {
 		global $wpdb;
-		$sql = "SELECT p.* FROM {$wpdb->prefix}posts p ";
+		$sql = "SELECT p.* FROM {$wpdb->prefix}bft_posts p ";
 		$sql .= "WHERE p.post_type = 'product' ";
 		$sql .= "AND p.ID ";
 		if(!$event_tickets_only) {
