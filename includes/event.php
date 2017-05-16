@@ -30,7 +30,7 @@ class BFT_Event extends BFT_Table {
 		);
 	}
 	
-	public static function Create($_Name)
+	public static function SCreate($_Name)
 	{
 		global $wpdb;
 		$wpdb->insert(
@@ -43,7 +43,7 @@ class BFT_Event extends BFT_Table {
 		return $event;
 	}
 	
-	public static function Archive($_ID)
+	public static function SArchive($_ID)
 	{
 		global $wpdb;
 		$wpdb->update(
@@ -57,7 +57,7 @@ class BFT_Event extends BFT_Table {
 		BFT_Log::Info(__CLASS__, sprintf('Event archived. ID: %d, Name: %s, User: %s', $event->ID, $event->Name, wp_get_current_user()->user_login));
 	}
 	
-	public static function Restore($_ID)
+	public static function SRestore($_ID)
 	{
 		global $wpdb;
 		$wpdb->update(
@@ -69,6 +69,21 @@ class BFT_Event extends BFT_Table {
 		);
 		$event = self::GetByID($_ID);
 		BFT_Log::Info(__CLASS__, sprintf('Event restored. ID: %d, Name: %s, User: %s', $event->ID, $event->Name, wp_get_current_user()->user_login));
+	}
+	
+	public static function SEditName($_ID, $_Name)
+	{
+		global $wpdb;
+		$oldEvent = self::GetByID($_ID);
+		
+		$wpdb->update(
+			$wpdb->prefix . self::$tab_name
+			,array('Name' => $_Name)
+			,array('PK_ID' => $_ID)
+			,array('%s')
+			,array('%d')
+		);
+		BFT_Log::Info(__CLASS__, sprintf('Event name changed. ID: %d, Name-Old: %s, Name-New: %s, User: %s', $_ID, $oldEvent->Name, $_Name, wp_get_current_user()->user_login));
 	}
 	
 	public static function GetByID($event_id)
@@ -115,5 +130,29 @@ class BFT_Event extends BFT_Table {
 		}
 		
 		return $events;
+	}
+
+	public function Archive() {
+		self::Archive($this->ID);
+	}
+	
+	public function Restore() {
+		self::Restore($this->ID);
+	}
+	
+	public function EditName($_Name) {
+		self::EditName($this->ID, $_Name);
+	}
+	
+	public function AddProduct($ProductID) {
+		BFT_Ticket::Replace($this->ID, $ProductID, BFT_Status::$Enabled);
+	}
+	
+	public function RemoveProduct($ProductID) {
+		BFT_Ticket::Replace($this->ID, $ProductID, BFT_Status::$Disabled);
+	}
+	
+	public function GetProducts() {
+		
 	}
 }
