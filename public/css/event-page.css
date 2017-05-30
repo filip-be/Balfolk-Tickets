@@ -1,0 +1,11 @@
+table.tab-events{
+	width: 100%
+}
+
+table.tab-events thead{
+	font-weight: bold;
+}
+
+table.tab-events td:nth-child(2), table.tab-events td:nth-child(3), table.tab-events td button, table.tab-events input[type="submit"] {
+	width: 100px;
+}
