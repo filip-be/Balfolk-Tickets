@@ -42,28 +42,39 @@ class BFT_EventPage {
 		), $atts );
 		
 		$event = BFT_Event::GetByID($a['id']);
-		$res = '<table class="bft-event-tickets">';
-		$res .= '<thead></thead>';
 		
-		$res .= '<tbody>';
+		$res = '<div class="bft-event-tickets">';
+		$res .= '<div class="bft-et-head">
+					<div class="bft-et-tr">
+						<div class="bft-et-td prod-thumb">&nbsp;</div>
+						<div class="bft-et-td prod-title">'.__('Item', 'woocommerce').'</div>
+						<div class="bft-et-td prod-qty">'.__('Quantity', 'woocommerce').'</div>
+						<div class="bft-et-td prod-price">'.__('Price', 'woocommerce').'</div>
+						<div class="bft-et-td prod-total">'.__('Total', 'woocommerce').'</div>
+						<div class="bft-et-td prod-cart">&nbsp;</div>
+					</div>
+				</div>';
+		
+		$res .= '<div class="bft-et-body">';
 		foreach($event->GetProducts() as $product) {
-			$res .= ' 
-			<tr>
-				<td class="prod-thumb">'.$product->get_image().'</td>
-				<td class="prod-title">'.$product->get_name();
+			$product_price = $product->get_price().' '.get_woocommerce_currency_symbol();
+			$res .= '
+			<form class="bft-et-tr cart" method="post" enctype="multipart/form-data" action="">
+				<div class="bft-et-td prod-thumb">'.$product->get_image().'</div>
+				<div class="bft-et-td prod-title">'.$product->get_name();
 			if($a['show-description'] == 1) {
-				$res .= '<span class="prod-title-slug">'.$product->get_short_description().'</span>';
+				$res .= '<p class="prod-title-slug bft-p-after">'.$product->get_short_description().'</p>';
 			}
-			$res .= '</td>
-				<td class="prod-qty"><input type="number" class="input-text qty text" step="1" min="0" max="" name="product[qty]" value="1" size="4" pattern="[0-9]*" inputmode="numeric"></td>
-				<td class="prod-price">'.$product->get_price().' '.get_woocommerce_currency_symbol().'</td>
-				<td class="prod-total">TOTAL</td>
-				<td class="prod-cart"><a class="prod-add-to-cart" href="'.$product->add_to_cart_url().'"/>'.$product->add_to_cart_text().'</a></td>
-			</tr>
-			';//&quantity=2
+			$res .= '</div>
+				<div class="bft-et-td prod-qty"><p class="bft-p-bold">'.__('Quantity', 'woocommerce').'</p>'.woocommerce_quantity_input( array(), $product, false ).'</div>
+				<div class="bft-et-td prod-price"><p class="bft-p-bold">'.__('Price', 'woocommerce').'</p><p class="bft-p-after">'.$product_price.'</p></div>
+				<div class="bft-et-td prod-total"><p class="bft-p-bold">'.__('Total', 'woocommerce').'</p><p class="bft-total bft-p-after" data-symbol="'.get_woocommerce_currency_symbol().'" data-price="'.$product->get_price().'">'.$product_price.'</p></div>
+				<div class="bft-et-td prod-cart"><button type="submit" name="add-to-cart" value="'.$product->get_id().'" class="single_add_to_cart_button button alt">'.$product->add_to_cart_text().'</button></div>
+			</form>';
 		}
-		$res .= "</tbody>";
-		$res .= "</table>";
+		$res .= "</div>";	//bft-et-body
+		$res .= '<div class="bft-et-foot"></div>';
+		$res .= "</div>";	//bft-event-tickets
 		
 		return "{$res}<br/>Event tickets {$a['id']}";
 	}
