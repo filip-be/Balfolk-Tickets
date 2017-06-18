@@ -19,6 +19,7 @@ class BFT_EventPage {
 		// add_action('wp_enqueue_scripts', BFT::$pluginDir.'public/css/event-page.css');
 		wp_enqueue_style('bftEventPageStyle', plugins_url('public/css/event-page.css', dirname(__FILE__)));
 		add_shortcode('bft_event_tickets', array(__CLASS__, 'event_tickets'));
+		add_action( 'woocommerce_add_cart_item_data', array(__CLASS__, 'add_event_id_to_product'));
 	}
 	
 	/**
@@ -33,10 +34,17 @@ class BFT_EventPage {
 		return self::$instance;
 	}
 	
+	function add_event_id_to_product( $cart_item_data, $product_id ) {
+		if( isset( $_REQUEST['bft-event-id'] ) ) {
+			$cart_item_data[ 'bft-event-id' ] = $_REQUEST['bft-event-id'];
+		}
+		return $cart_item_data;
+	}
+	
 	public static function event_tickets($atts) {
 		$res = '';
 		wp_enqueue_script('bftEventPageScript', plugins_url('public/js/event-tickets.js', dirname(__FILE__)));
-		
+				
 		wc_print_notices();
 		
 		$a = shortcode_atts( array(
@@ -63,6 +71,7 @@ class BFT_EventPage {
 			$product_price = $product->get_price().' '.get_woocommerce_currency_symbol();
 			$res .= '
 			<form class="bft-et-tr cart" method="post" enctype="multipart/form-data" action="">
+				<input type="hidden" name="bft-event-id" value="'.$event->ID.'"/>
 				<div class="bft-et-td prod-thumb">'.$product->get_image().'</div>
 				<div class="bft-et-td prod-title">'.$product->get_name();
 			if($a['show-description'] == 1) {
@@ -79,7 +88,7 @@ class BFT_EventPage {
 		$res .= '<div class="bft-et-foot"></div>';
 		$res .= "</div>";	//bft-event-tickets
 		
-		return "{$res}<br/>Event tickets {$a['id']}";
+		return $res;
 	}
  }
  

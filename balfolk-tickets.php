@@ -3,7 +3,7 @@
 Plugin Name: Balfolk Tickets
 Plugin URI:  https://github.com/filip-be/Balfolk-Tickets
 Description: WordPress ticketing plugin for balfolk events
-Version:     0.7.5
+Version:     0.7.6
 Author:      Filip Bieleszuk
 Author URI:  https://github.com/filip-be
 License:     GPL3
@@ -52,13 +52,9 @@ class BFT
 			add_action('admin_head', array(__CLASS__, 'add_admin_styles'));
 		}
 		
-		// add_action		( 'plugins_loaded', 					array( $this, 'textdomain'				) 			);
-		// add_action		( 'admin_enqueue_scripts',				array( $this, 'admin_scripts'			)			);
-		// add_action		( 'do_meta_boxes',						array( $this, 'create_metaboxes'		),	10,	2	);
-		// add_action		( 'save_post',							array( $this, 'save_custom_meta'		),	1		);
-		// front end
-		// add_action		( 'wp_enqueue_scripts',					array( $this, 'front_scripts'			),	10		);
-		// add_filter		( 'comment_form_defaults',				array( $this, 'custom_notes_filter'		) 			);
+		add_filter( 'woocommerce_get_item_data',  array(__CLASS__, 'render_event_id_on_cart'), 10, 2);
+		add_filter( 'woocommerce_get_cart_item_from_session', array(__CLASS__, 'update_cart_item_from_session'), 10, 2);
+		add_action( 'woocommerce_thankyou', array(__CLASS__, 'order_completed'), 10, 1);
 	}
 	
 	/**
@@ -134,6 +130,30 @@ class BFT
 		$siteurl = get_option('siteurl');
 		$url = plugins_url('admin/css/style.css', __FILE__);
 		echo "<link rel='stylesheet' type='text/css' href='$url' />\n";
+	}
+	
+	public function render_event_id_on_cart( $cart_data, $cart_item ) {
+		$custom_items = array();
+		/* Woo 2.4.2 updates */
+		if( !empty( $cart_data ) ) {
+			$custom_items = $cart_data;
+		}
+		
+		if( isset( $cart_item['bft-event-id'] ) ) {
+			$custom_items[] = array( "name" => 'Event ID', "value" => $cart_item['bft-event-id'] );
+		}
+		return $custom_items;
+	}
+	
+	public function update_cart_item_from_session( $cart_item, $values ) {
+		if ( isset( $values['btf-event-id'] ) ){
+			$cart_item['btf-event-id'] = $values['btf-event-id'];
+		}
+		return $cart_item;
+	}
+	
+	public function order_completed( $order_id ) {
+		
 	}
 	
 /// end class
