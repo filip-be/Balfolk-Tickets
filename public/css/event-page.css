@@ -79,6 +79,14 @@ DIV.bft-event-tickets .bft-et-body .prod-cart button{
 	padding: 5px;
 }
 
+.woocommerce-message {
+	
+}
+
+.woocommerce-message .button {
+	float: right;
+}
+
 @media screen and (max-width: 480px){
 	DIV.bft-event-tickets{
 		width: 100%;

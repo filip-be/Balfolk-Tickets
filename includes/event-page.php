@@ -34,7 +34,10 @@ class BFT_EventPage {
 	}
 	
 	public static function event_tickets($atts) {
+		$res = '';
 		wp_enqueue_script('bftEventPageScript', plugins_url('public/js/event-tickets.js', dirname(__FILE__)));
+		
+		wc_print_notices();
 		
 		$a = shortcode_atts( array(
 			'id' => 0
@@ -43,13 +46,13 @@ class BFT_EventPage {
 		
 		$event = BFT_Event::GetByID($a['id']);
 		
-		$res = '<div class="bft-event-tickets">';
+		$res .= '<div class="bft-event-tickets">';
 		$res .= '<div class="bft-et-head">
 					<div class="bft-et-tr">
 						<div class="bft-et-td prod-thumb">&nbsp;</div>
 						<div class="bft-et-td prod-title">'.__('Item', 'woocommerce').'</div>
-						<div class="bft-et-td prod-qty">'.__('Quantity', 'woocommerce').'</div>
 						<div class="bft-et-td prod-price">'.__('Price', 'woocommerce').'</div>
+						<div class="bft-et-td prod-qty">'.__('Quantity', 'woocommerce').'</div>
 						<div class="bft-et-td prod-total">'.__('Total', 'woocommerce').'</div>
 						<div class="bft-et-td prod-cart">&nbsp;</div>
 					</div>
@@ -66,8 +69,8 @@ class BFT_EventPage {
 				$res .= '<p class="prod-title-slug bft-p-after">'.$product->get_short_description().'</p>';
 			}
 			$res .= '</div>
-				<div class="bft-et-td prod-qty"><p class="bft-p-bold">'.__('Quantity', 'woocommerce').'</p>'.woocommerce_quantity_input( array(), $product, false ).'</div>
 				<div class="bft-et-td prod-price"><p class="bft-p-bold">'.__('Price', 'woocommerce').'</p><p class="bft-p-after">'.$product_price.'</p></div>
+				<div class="bft-et-td prod-qty"><p class="bft-p-bold">'.__('Quantity', 'woocommerce').'</p>'.woocommerce_quantity_input( array('min_value' => 1), $product, false ).'</div>
 				<div class="bft-et-td prod-total"><p class="bft-p-bold">'.__('Total', 'woocommerce').'</p><p class="bft-total bft-p-after" data-symbol="'.get_woocommerce_currency_symbol().'" data-price="'.$product->get_price().'">'.$product_price.'</p></div>
 				<div class="bft-et-td prod-cart"><button type="submit" name="add-to-cart" value="'.$product->get_id().'" class="single_add_to_cart_button button alt">'.$product->add_to_cart_text().'</button></div>
 			</form>';
