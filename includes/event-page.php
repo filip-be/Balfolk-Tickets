@@ -18,8 +18,8 @@ class BFT_EventPage {
 	private function __construct() {
 		// add_action('wp_enqueue_scripts', BFT::$pluginDir.'public/css/event-page.css');
 		wp_enqueue_style('bftEventPageStyle', plugins_url('public/css/event-page.css', dirname(__FILE__)));
-		add_shortcode('bft_event_tickets', array(__CLASS__, 'event_tickets'));
-		add_action( 'woocommerce_add_cart_item_data', array(__CLASS__, 'add_event_id_to_product'));
+		add_shortcode('bft_event_tickets', array($this, 'event_tickets'));
+		add_action( 'woocommerce_add_cart_item_data', array($this, 'add_event_id_to_product'), 10, 1);
 	}
 	
 	/**
@@ -34,7 +34,7 @@ class BFT_EventPage {
 		return self::$instance;
 	}
 	
-	function add_event_id_to_product( $cart_item_data, $product_id ) {
+	function add_event_id_to_product( $cart_item_data ) {
 		if( isset( $_REQUEST['bft-event-id'] ) ) {
 			$cart_item_data[ 'bft-event-id' ] = $_REQUEST['bft-event-id'];
 		}
