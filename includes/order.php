@@ -9,6 +9,8 @@ require_once 'log.php';
 
 class BFT_Order {
 	
+	protected static $defaultLanguageSlug = 'pl';
+	
 	// WooCommerce order object
 	public $Worder;
 	
@@ -74,16 +76,15 @@ class BFT_Order {
 		
 		// Loop through order items
 		foreach($this->Worder->get_items() as $item) {
-			$product_id = $item->get_id();
+			$order_item_id = $item->get_id();
+			$ticket_id = pll_get_post($item->get_product_id(), self::$defaultLanguageSlug);
 			$event_id = $item->get_meta('_bft-event-id');
+			$quantity = $item->get_quantity();
 			if(is_null($event_id))
 			{
-				BFT_Log::Warn(__CLASS__, "Event ID not saved for the product item! OrderID: {$order_id} ItemID: {$product_id}");
+				BFT_Log::Warn(__CLASS__, "Event ID not saved for the product item! OrderID: {$order_id} ItemID: {$order_item_id}");
 			}
-			// single item can have multiple quantity
-			// item id != product id
-			// $item->get_product_id()
-			array_push($tickets, BFT_OrderTicket::GetOrderTicket($order_id, $event_id, $product_id));
+			array_push($tickets, BFT_OrderTicket::GetOrderTickets($order_id, $event_id, $ticket_id, $order_item_id, $quantity));
 		}
 		
 		return $tickets;

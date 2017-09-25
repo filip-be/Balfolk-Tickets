@@ -8,6 +8,12 @@ require_once 'log.php';
 class BFT_Ticket extends BFT_Table {
 	protected static $tab_name = "bft_ticket";
 	
+	public $ID;
+	public $EventID;
+	public $ProductID;
+	public $Timestamp;
+	public $Status;
+	
 	public function __construct()
 	{
 		parent::__construct();
@@ -55,6 +61,54 @@ class BFT_Ticket extends BFT_Table {
 			$operation = "removed from";
 		}
 		BFT_Log::Info(__CLASS__, sprintf("Product {$operation} the event. EventID: %d, ProductID: %d, User: %s", $EventID, $ProductID, wp_get_current_user()->user_login));
-		return res;
+		return $res;
+	}
+	
+	// Get ticket by ID
+	public static function GetByID($ticket_id)
+	{
+		global $wpdb;
+		$table_name = $wpdb->prefix . self::$tab_name;
+		$query = $wpdb->prepare("SELECT * FROM $table_name WHERE PK_ID = %d", $ticket_id);
+		$row = $wpdb->get_row($query);
+		$ticket = self::FromDBRow($row);
+		if(is_null($ticket))
+		{
+			BFT_Log::Warn(__CLASS__, 'Could not find ticket with id: ' . $ticket_id);
+		}
+		return $ticket;
+	}
+	
+	// Get ticket by ID
+	public static function GetByEventIDProductID($event_id, $product_id)
+	{
+		global $wpdb;
+		$table_name = $wpdb->prefix . self::$tab_name;
+		$query = $wpdb->prepare("SELECT * FROM $table_name WHERE FK_EventID = %d AND FK_ProductID = %d", 
+							$event_id,
+							$product_id);
+		$row = $wpdb->get_row($query);
+		$ticket = self::FromDBRow($row);
+		if(is_null($ticket))
+		{
+			BFT_Log::Warn(__CLASS__, "Could not find ticket with EventID: {$event_id}, ProductID: {$product_id}");
+		}
+		return $ticket;
+	}
+	
+	// Initialize from DB row
+	protected static function FromDBRow($row)
+	{
+		if(is_null($row))
+		{
+			return null;
+		}
+		$ticket = new self();
+		$ticket->ID = $row->PK_ID;
+		$ticket->EventID = $row->FK_EventID;
+		$ticket->ProductID = $row->FK_ProductID;
+		$ticket->Timestamp = $row->Timestamp;
+		$ticket->Status = $row->Status;
+		return $ticket;
 	}
 }
