@@ -40,7 +40,8 @@ class BFT_Order {
 			BFT_Log::Warn(__CLASS__, 'Could not find order with key: ' . $order_key);
 			return null;
 		}
-		return BFT_Order::GetByID($order_id);
+		$Order = BFT_Order::GetByID($order_id);
+		return $Order;
 	}
 	
 	// Get order status
