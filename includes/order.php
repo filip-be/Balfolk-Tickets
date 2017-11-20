@@ -77,7 +77,7 @@ class BFT_Order {
 	}
 	
 	// Get order status
-	protected function get_status()
+	public function get_status()
 	{
 		if(is_null($this->Worder))
 		{
@@ -88,7 +88,7 @@ class BFT_Order {
 	}
 	
 	// Get tickets
-	protected function get_tickets() {
+	public function get_tickets() {
 		if(is_null($this->Worder))
 		{
 			BFT_Log::Warn(__CLASS__, 'Order is not initialized');
