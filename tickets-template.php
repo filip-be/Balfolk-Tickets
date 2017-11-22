@@ -7,6 +7,22 @@
 // reference the Dompdf namespace
 use Dompdf\Dompdf;
 
+// Get <img> tag
+function getImage($uri, $width, $height, $styles) {
+	if(is_null($uri)) {
+		return '';
+	}
+	$img_content = file_get_contents($uri);
+	$encodedImage = base64_encode($img_content);
+	if(is_null($styles)) {
+		$styles = '';
+	}
+	$styles .= "width: {$width}px; ";
+	$styles .= "height: {$height}px; ";
+	
+	return '<img style="'.$styles.'" src="data:image/png;base64,'.$encodedImage.'"/>';
+}
+
 // Show tickets
 function showTicket() {
 	// Order hash must not be empty
@@ -27,8 +43,22 @@ function showTicket() {
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 		<style>
-			body{
-				font-family: 'DejaVu Sans';
+			body		{ font-family: 'DejaVu Sans'; }
+			.ticket 	{ width: 100%; }
+			.header 	{ text-align: center; width: 100%; clear: both; }
+			.header h2 	{ margin: 0; }
+			.qrCode img	{ float: right; }
+			.qrCode p	{ display: block; width: 150px; text-align: center; float: right; clear: right; color: gray; font-size: 0.8em; }
+			.product img { float: left; }
+			.product h3 { margin: 7px 7px 0 0; }
+			.footer {
+				color: white;
+				background-color: black;
+				width: 100%;
+				text-align: right;
+				padding: 5px;
+				position: fixed; 
+				bottom: 0px;
 			}
 		</style>
 		<title>Ticket</title>
@@ -58,20 +88,39 @@ function showTicket() {
 					return false;
 				}
 				
-				// Print QR code
-				$qrCode = base64_encode(file_get_contents("https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl='.$orderTicket->Hash.'&chld=Q|3"));
-				print '<p style="float: right; width: 150px; height: 150px;"><img src="data:image/png;base64,'.$qrCode.'"/></p>';
+				// Product thumbnail 
+				$thumbnailUri = false;
+				$thumbnailUri = get_the_post_thumbnail_url($wcProduct->get_id());
+				if($thumbnailUri == false) {
+					$thumbnailUri = wc_placeholder_img_src();
+				}
+				$thumbnailImg = getImage($thumbnailUri, 65, 65, "vertical-align: top; margin: 0 5px 5px 0;", null);
 				
-				// Paragraph
-				print '<p style="float: left">';
-				// Print event name, product name & short description
-				print "<h2>{$eventDef->Name}</h2>";
+				// QR code image
+				$qrCodeImage = getImage("https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl='.$orderTicket->Hash.'&chld=Q|3", 150, 150, null);
+				
+				// Page div START
+				print '<div class="ticket">';
+				
+				// Event name
+				print "<header class=\"header\"><h2>{$eventDef->Name}</h2></header>";
+				
+				// QR code
+				print '<div class="qrCode">'.$qrCodeImage.'<p>'.$orderTicket->Hash.'</p></div>';
+				
+				// Left column
+				print "<div class=\"product\">";
 				print "<h3>{$wcProduct->get_name()}</h3>";
-				print "<p>{$wcProduct->get_short_description()}</p>";
+				print "$thumbnailImg";
+				print '<p>'.$wcProduct->get_short_description().'</p>';
+				print "</div>";
 				
-				// Paragraph end
-				print '</p>';
 				
+				// Footer
+				print '<div class="footer">© '.date("Y").' '.get_bloginfo('name').'</div>';
+				
+				// Page div END
+				print '</div>';
 				// Page break
 				if(++$ticketNum < count($order->Tickets))
 				{
