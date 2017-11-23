@@ -79,6 +79,16 @@ DIV.bft-event-tickets .bft-et-body .prod-cart button{
 	padding: 5px;
 }
 
+DIV.bft-event-tickets .bft-et-body .prod-cart .single_add_to_cart_button{
+	font-weight: 400;
+	line-height: 1;
+}
+
+DIV.bft-event-tickets .bft-et-body .prod-cart .single_add_to_cart_button:hover{
+	opacity: 0.7;
+	filter: alpha(opacity=70); /* msie */
+}
+
 .woocommerce-message {
 	
 }

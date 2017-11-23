@@ -3,7 +3,7 @@
 Plugin Name: Balfolk Tickets
 Plugin URI:  https://github.com/filip-be/Balfolk-Tickets
 Description: WordPress ticketing plugin for balfolk events
-Version:     0.8.15
+Version:     0.8.16
 Author:      Filip Bieleszuk
 Author URI:  https://github.com/filip-be
 License:     GPL3
@@ -54,9 +54,13 @@ class BFT
 			add_action('admin_head', array($this, 'add_admin_styles'));
 		}
 		
+		// Polylang strings translation
+		add_action( 'plugins_loaded', array($this, 'polylang_register_strings'), 10, 0);
+		
 		// WooCommerce
 		add_filter( 'woocommerce_get_item_data',  array($this, 'render_event_id_on_cart'), 10, 2);
 		add_filter( 'woocommerce_get_cart_item_from_session', array($this, 'update_cart_item_from_session'), 10, 2);
+		add_filter( 'woocommerce_checkout_fields', array($this, 'update_woocommerce_checkout_fields'), 10, 1);
 		add_action( 'woocommerce_checkout_create_order_line_item', array($this, 'save_event_id_meta'), 10, 4 );
 		add_action( 'woocommerce_thankyou', array($this, 'order_completed'), 10, 1);
 		add_action( 'woocommerce_billing_fields', array($this, 'remove_address_fields'), 10, 1);
@@ -190,8 +194,17 @@ class BFT
 	}
 	
 	public function email_order_details($order, $sent_to_admin, $plain_text, $email) {
-		$order_hash = htmlspecialchars($order->get_order_key());
-		echo '<p style="float: right"><img src="https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl='.$order_hash.'&chld=Q|3"/></p>';
+		// Add QR code only to completed orders
+		if(!$sent_to_admin && $order->get_status() == 'completed') {
+			$order_hash = htmlspecialchars($order->get_order_key());
+			echo '<p style="float: right"><img src="https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl='.$order_hash.'&chld=Q|3"/></p>';
+			
+			echo '<p>';
+			echo pll__('BFTTicketGeneratorText');
+			echo ' <a href="'.pll__('BFTTicketGeneratorURI').'?id='.$order->get_order_key().'">';
+			echo pll__('BFTDownloadTicketText');
+			echo '</a></p>';
+		}
 	}
 	
 	//remove some fields from billing form
@@ -277,6 +290,20 @@ class BFT
 
 		// Return template
 		return $template;
+	}
+	
+	public function update_woocommerce_checkout_fields( $fields ) {
+		if(isset($fields) && isset($fields['order'])) {
+			$fields['order']['order_comments']['placeholder'] = pll__('Notes about your order.');
+		}
+		return $fields;
+	}
+	
+	public function polylang_register_strings() {
+		pll_register_string('woocommerce_order_notes_placeholder', 'Notes about your order.');
+		pll_register_string('bft_ticket_generator_uri', 'BFTTicketGeneratorURI', 'Bal Folk Tickets');
+		pll_register_string('bft_ticket_generator_text', 'BFTTicketGeneratorText', 'Bal Folk Tickets');
+		pll_register_string('bft_ticket_generator_download_text', 'BFTDownloadTicketText', 'Bal Folk Tickets');
 	}
 	
 /// end class
