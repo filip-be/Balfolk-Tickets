@@ -53,6 +53,7 @@ DIV.bft-event-tickets p.prod-title-slug{
 
 DIV.bft-event-tickets .bft-et-head .prod-thumb{
 	width: 60px;
+	min-width: 60px;
 }
 
 DIV.bft-event-tickets .bft-et-head .prod-title{
@@ -61,18 +62,27 @@ DIV.bft-event-tickets .bft-et-head .prod-title{
 
 DIV.bft-event-tickets .bft-et-head .prod-qty{
 	width: 70px;
+	min-width: 70px;
+}
+
+
+.prod-qty input[type="number"]{
+	width: 70px;
 }
 
 DIV.bft-event-tickets .bft-et-head .prod-price{
 	width: 80px;
+	min-width: 80px;
 }
 
 DIV.bft-event-tickets .bft-et-head .prod-total{
 	width: 80px;
+	min-width: 80px;
 }
 
 DIV.bft-event-tickets .bft-et-head .prod-cart{
 	width: 160px;
+	min-width: 160px;
 }
 
 DIV.bft-event-tickets .bft-et-body .prod-cart button{
@@ -82,6 +92,11 @@ DIV.bft-event-tickets .bft-et-body .prod-cart button{
 DIV.bft-event-tickets .bft-et-body .prod-cart .single_add_to_cart_button{
 	font-weight: 400;
 	line-height: 1;
+}
+@media screen and (max-width: 768px) {
+	DIV.bft-event-tickets .bft-et-body .prod-cart .single_add_to_cart_button{
+		height: 48px;
+	}
 }
 
 DIV.bft-event-tickets .bft-et-body .prod-cart .single_add_to_cart_button:hover{

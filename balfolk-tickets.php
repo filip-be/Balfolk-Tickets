@@ -3,7 +3,7 @@
 Plugin Name: Balfolk Tickets
 Plugin URI:  https://github.com/filip-be/Balfolk-Tickets
 Description: WordPress ticketing plugin for balfolk events
-Version:     0.8.16
+Version:     0.9.0
 Author:      Filip Bieleszuk
 Author URI:  https://github.com/filip-be
 License:     GPL3
@@ -198,6 +198,9 @@ class BFT
 		if(!$sent_to_admin && $order->get_status() == 'completed') {
 			$order_hash = htmlspecialchars($order->get_order_key());
 			echo '<p style="float: right"><img src="https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl='.$order_hash.'&chld=Q|3"/></p>';
+						
+			echo '<p>'.pll__('BFTOrderCompletedText').'</p>';
+			
 			
 			echo '<p>';
 			echo pll__('BFTTicketGeneratorText');
@@ -304,6 +307,7 @@ class BFT
 		pll_register_string('bft_ticket_generator_uri', 'BFTTicketGeneratorURI', 'Bal Folk Tickets');
 		pll_register_string('bft_ticket_generator_text', 'BFTTicketGeneratorText', 'Bal Folk Tickets');
 		pll_register_string('bft_ticket_generator_download_text', 'BFTDownloadTicketText', 'Bal Folk Tickets');
+		pll_register_string('bft_ticket_order_completed_text', 'BFTOrderCompletedText', 'Bal Folk Tickets');
 	}
 	
 /// end class
