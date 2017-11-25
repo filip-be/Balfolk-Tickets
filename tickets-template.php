@@ -34,6 +34,11 @@ function showTicket() {
 			return false;
 		}
 		
+		$eventName = 'Ticket';
+		$orderId = $order->OrderId;
+		$ticketStr = pll__('BFTTicket');
+		$simplifiedTicketName = get_bloginfo('name').' - '.$ticketStr;
+		
 		// Generate HTML for PDF
 		ob_start();
 		?>
@@ -43,14 +48,14 @@ function showTicket() {
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 		<style>
-			body		{ font-family: 'DejaVu Sans'; }
+			body		{ font-family: 'DejaVu Sans'; font-size: 13px; }
 			.ticket 	{ width: 100%; }
-			.header 	{ text-align: center; width: 100%; clear: both; }
+			.header 	{ text-align: center; width: 100%; clear: both; float: left; }
 			.header h2 	{ margin: 0; }
 			.qrCode img	{ float: right; }
 			.qrCode p	{ display: block; width: 150px; text-align: center; float: right; clear: right; color: gray; font-size: 0.8em; }
 			.product img { float: left; }
-			.product h3 { margin: 7px 7px 0 0; }
+			.product h3 { margin: 7px 7px 0 0; width: 100%; }
 			.footer {
 				color: white;
 				background-color: black;
@@ -61,7 +66,7 @@ function showTicket() {
 				bottom: 0px;
 			}
 		</style>
-		<title>Ticket</title>
+		<title><?php echo $simplifiedTicketName; ?></title>
 	</head>
 	<body>
 		<?php
@@ -80,6 +85,10 @@ function showTicket() {
 				if(is_null($eventDef))
 				{
 					return false;
+				}
+				if($eventName == 'Ticket')
+				{
+					$eventName = $eventDef->Name;
 				}
 				// Get product definition
 				$wcProduct = wc_get_product(pll_get_post($ticketDef->ProductID));
@@ -103,7 +112,7 @@ function showTicket() {
 				print '<div class="ticket">';
 				
 				// Event name
-				print "<header class=\"header\"><h2>{$eventDef->Name}</h2></header>";
+				print "<div class=\"header\"><h2>{$eventDef->Name} - {$ticketStr} #{$orderTicket->ID}</h2></div><br/><br/>";
 				
 				// QR code
 				print '<div class="qrCode">'.$qrCodeImage.'<p>'.$orderTicket->Hash.'</p></div>';
@@ -112,7 +121,7 @@ function showTicket() {
 				print "<div class=\"product\">";
 				print "<h3>{$wcProduct->get_name()}</h3>";
 				print "$thumbnailImg";
-				print '<p>'.$wcProduct->get_short_description().'</p>';
+				print '<p>'.nl2br($wcProduct->get_short_description()).'</p>';
 				print "</div>";
 				
 				
@@ -147,8 +156,9 @@ function showTicket() {
 		$dompdf->render();
 
 		// Output the generated PDF to Browser
-		$dompdf->stream("ticket.pdf", array("Attachment" => false));
-		//print $html;
+		$ticketName = $eventName.' - '.$ticketStr.'.pdf';
+		$dompdf->stream($ticketName, array("Attachment" => false));
+		// print $html;
 		
 		return true;
 	}
