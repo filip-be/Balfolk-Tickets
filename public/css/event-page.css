@@ -1,3 +1,8 @@
+DIV.bft-event-message{
+	text-align: center;
+	font-weight: bold;
+}
+
 DIV.bft-event-tickets{
 	width: 100%;
 	display: table;
