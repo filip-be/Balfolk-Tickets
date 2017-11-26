@@ -78,6 +78,12 @@ class BFT_EventPage {
 			$res .= '<div class="bft-et-body">';
 			foreach($event->GetProducts() as $product) {
 				$originalProductId = pll_get_post($product->get_id(), pll_default_language('slug'));
+				$originalProduct = new WC_Product($originalProductId);
+				$stillAvailable = true;
+				if($originalProduct->get_manage_stock() && $originalProduct->get_stock_quantity() == 0)
+				{
+					$stillAvailable = false;
+				}
 				$product_price = $product->get_price().' '.get_woocommerce_currency_symbol();
 				$res .= '
 				<form class="bft-et-tr cart" method="post" enctype="multipart/form-data" action="">
@@ -90,9 +96,16 @@ class BFT_EventPage {
 				$res .= '</div>
 					<div class="bft-et-td prod-price"><p class="bft-p-bold">'.__('Price', 'woocommerce').'</p><p class="bft-p-after">'.$product_price.'</p></div>
 					<div class="bft-et-td prod-qty"><p class="bft-p-bold">'.__('Quantity', 'woocommerce').'</p>'.woocommerce_quantity_input( array('min_value' => 1), $product, false ).'</div>
-					<div class="bft-et-td prod-total"><p class="bft-p-bold">'.__('Total', 'woocommerce').'</p><p class="bft-total bft-p-after" data-symbol="'.get_woocommerce_currency_symbol().'" data-price="'.$product->get_price().'">'.$product_price.'</p></div>
-					<div class="bft-et-td prod-cart"><button type="submit" name="add-to-cart" value="'.$originalProductId.'" class="single_add_to_cart_button button alt">'.$product->add_to_cart_text().'</button></div>
-				</form>';
+					<div class="bft-et-td prod-total"><p class="bft-p-bold">'.__('Total', 'woocommerce').'</p><p class="bft-total bft-p-after" data-symbol="'.get_woocommerce_currency_symbol().'" data-price="'.$product->get_price().'">'.$product_price.'</p></div>';
+					if($stillAvailable)
+					{
+						$res .= '<div class="bft-et-td prod-cart"><button type="submit" name="add-to-cart" value="'.$originalProductId.'" class="single_add_to_cart_button button alt">'.$product->add_to_cart_text().'</button></div>';
+					}
+					else
+					{
+						$res .= '<div class="bft-et-td prod-cart">'.pll__('BFTProductNotAvailable').'</div>';
+					}
+				$res .= '</form>';
 			}
 			$res .= "</div>";	//bft-et-body
 			$res .= '<div class="bft-et-foot"></div>';
