@@ -12,7 +12,13 @@ function getImage($uri, $width, $height, $styles) {
 	if(is_null($uri)) {
 		return '';
 	}
-	$img_content = file_get_contents($uri);
+	$contextOptions = array(
+		"ssl" => array(
+			"verify_peer"=>false,
+			"verify_peer_name"=>false,
+		),
+	);
+	$img_content = file_get_contents($uri, false, stream_context_create($contextOptions));
 	$encodedImage = base64_encode($img_content);
 	if(is_null($styles)) {
 		$styles = '';
