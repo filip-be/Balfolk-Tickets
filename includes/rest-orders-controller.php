@@ -62,15 +62,7 @@ class BFT_REST_Orders_Controller extends WP_REST_Controller {
 			register_rest_route( $this->namespace, '/' . $this->rest_base, array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_order' ),
-					'permission_callback' => array( $this, 'bft_orders_permissions_check' ),
-				),
-				'schema' => array( $this, 'get_public_item_schema' ),
-			) );
-			register_rest_route( $this->namespace, '/' . $this->rest_base, array(
-				array(
-					'methods'             => WP_REST_Server::EDITABLE,
-					'callback'            => array( $this, 'update_order' ),
+					'callback'            => array( $this, 'get_orders' ),
 					'permission_callback' => array( $this, 'bft_orders_permissions_check' ),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
@@ -101,7 +93,53 @@ class BFT_REST_Orders_Controller extends WP_REST_Controller {
 			) );
 		} );
 	}
+	
+	/**
+	 * Get all orders
+	 */
+	public function get_orders( $request ) {
+		// Query WooCommerce for all order ID's
+		$query = new WC_Order_Query( array(
+			'limit' => -1,
+			'orderby' => 'date',
+			'order' => 'DESC',
+			'return' => 'ids',
+		) );
+		$orderIDs = $query->get_orders();
+		
+		$bftOrders = array();
+		// Loop orders IDs
+		foreach($orderIDs as $orderId)
+		{
+			array_push($bftOrders, $this->get_order_item($orderId));
+		}
+		
+		// Create the response object
+		$response = new WP_REST_Response( $bftOrders );
+		 
+		// Add OK status code
+		$response->set_status( 200 );
+		return $response;
+	}
 
+	private function get_order_item($key)
+	{
+		// Get by order id
+		$order = BFT_Order::GetByID($key);
+		
+		// Not found - Get by order key
+		if(is_null($order)) {
+			$order = BFT_Order::GetByKey($key);
+		
+			// Not found Get by single order ticket key
+			if(is_null($order)) {
+				$order = BFT_Order::GetByTicketHash($key);
+			}
+		}
+		
+		return $order;
+	}
+	
 	/**
 	 * Get order with key defined
 	 */
@@ -109,18 +147,8 @@ class BFT_REST_Orders_Controller extends WP_REST_Controller {
 		if(is_null($request['key'])) {
 			return new WP_Error('bft_rest_missing_arg', __('Order key is missing', 'woocommerce'), array( 'status' => 404) );
 		}
-		// Get by order id
-		$order = BFT_Order::GetByID($request['key']);
 		
-		// Not found - Get by order key
-		if(is_null($order)) {
-			$order = BFT_Order::GetByKey($request['key']);
-		
-			// Not found Get by single order ticket key
-			if(is_null($order)) {
-				$order = BFT_Order::GetByTicketHash($request['key']);
-			}
-		}
+		$order = $this->get_order_item($request['key']);
 		
 		// Still not found, return an error!
 		if(is_null($order)) {

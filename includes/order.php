@@ -18,8 +18,26 @@ class BFT_Order {
 	public $OrderId;
 	public $Type;
 	
+	public $OrderBillingName;
+	public $OrderBillingEmail;
+	public $OrderBillingPhone;
+	public $OrderCustomerNote;
+	public $OrderKey;
+	// public $OrderNotes;
+	
 	public function __construct( )
 	{
+	}
+	
+	// Get order data
+	public function LoadOrderData()
+	{
+		$this->OrderBillingName = $this->Worder->get_formatted_billing_full_name();
+		$this->OrderBillingEmail = $this->Worder->get_billing_email();
+		$this->OrderBillingPhone = $this->Worder->get_billing_phone();
+		$this->OrderCustomerNote = $this->Worder->get_customer_note();
+		$this->OrderKey = $this->Worder->get_order_key();
+		// $this->OrderNotes = wc_get_order_notes(array( 'order_id' => $this->OrderId ));
 	}
 	
 	// Get order by ID
@@ -35,6 +53,7 @@ class BFT_Order {
 		$Order->Tickets = $Order->get_tickets();
 		$Order->Status = $Order->get_status();
 		$Order->OrderId = $Order->Worder->get_id();
+		$Order->LoadOrderData();
 		$Order->Type = 'Full';
 		return $Order;
 	}
@@ -71,6 +90,7 @@ class BFT_Order {
 		$Order->Tickets = array($OrderTicket);
 		$Order->Status = $FullOrder->Status;
 		$Order->OrderId = $FullOrder->OrderId;
+		$Order->LoadOrderData();
 		$Order->Type = 'Partial';
 		
 		return $Order;
