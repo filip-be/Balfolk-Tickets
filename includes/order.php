@@ -23,7 +23,7 @@ class BFT_Order {
 	public $OrderBillingPhone;
 	public $OrderCustomerNote;
 	public $OrderKey;
-	// public $OrderNotes;
+	public $OrderNotes;
 	
 	public function __construct( )
 	{
@@ -37,7 +37,6 @@ class BFT_Order {
 		$this->OrderBillingPhone = $this->Worder->get_billing_phone();
 		$this->OrderCustomerNote = $this->Worder->get_customer_note();
 		$this->OrderKey = $this->Worder->get_order_key();
-		// $this->OrderNotes = wc_get_order_notes(array( 'order_id' => $this->OrderId ));
 	}
 	
 	// Get order by ID
@@ -94,6 +93,12 @@ class BFT_Order {
 		$Order->Type = 'Partial';
 		
 		return $Order;
+	}
+	
+	// Load order notes
+	public function load_notes()
+	{
+		$this->OrderNotes = wc_get_order_notes(array( 'order_id' => $this->OrderId ));
 	}
 	
 	// Get order status
