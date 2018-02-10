@@ -87,7 +87,7 @@ class BFT_REST_Orders_Controller extends WP_REST_Controller {
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_order' ),
 					'permission_callback' => array( $this, 'bft_orders_permissions_check' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+					'args'                => $this->get_endpoint_args_for_item_schema( false ),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
 			) );
@@ -172,7 +172,58 @@ class BFT_REST_Orders_Controller extends WP_REST_Controller {
 	 * Update order
 	 */
 	public function update_order($request) {
+		$order = new BFT_Order();
 		
+		if(is_null($request)
+			|| empty((int)$request['OrderId']))
+		{
+			$order->OrderCustomerNote = 'Order ID is missing!';
+			return new WP_REST_Response( $order, 200 );
+		}
+		
+		$wcOrder = wc_get_order($request['OrderId']);
+		if(empty($wcOrder))
+		{
+			$order->OrderCustomerNote = 'There is no order with the ID: '.$request['OrderId'];
+			return new WP_REST_Response( $order, 200 );
+		}
+		
+		if(empty($request['Tickets']))
+		{
+			$order->OrderCustomerNote = 'There is no tickets to update!';
+			return new WP_REST_Response( $order, 200 );
+		}
+		
+		foreach($request['Tickets'] as $ticket)
+		{
+			if(empty($ticket['Hash']))
+			{
+				$order->OrderCustomerNote = 'Order ticket Hash missing!';
+				return new WP_REST_Response( $order, 200 );
+			}
+			if(empty($ticket['Status']))
+			{
+				$order->OrderCustomerNote = 'Order ticket Status missing!';
+				return new WP_REST_Response( $order, 200 );
+			}
+			$orderTicket = BFT_OrderTicket::GetByHash($ticket['Hash']);
+			if(empty($orderTicket))
+			{
+				$order->OrderCustomerNote = 'Could not find ticket '.$ticket['Hash'];
+				return new WP_REST_Response( $order, 200 );
+			}
+			if(!$orderTicket->UpdateStatus($ticket['Status']))
+			{
+				
+				$order->OrderCustomerNote = 'Could not update ticket '.$ticket['Hash'];
+				return new WP_REST_Response( $order, 200 );
+			}
+		}
+		$wcOrder->add_order_note(sprintf('Checked %d tickets', count($request['Tickets'])));
+		
+		// Create the response object
+		$response = new WP_REST_Response( $order, 200 );
+		return $response;
 	}
 	
 	/**

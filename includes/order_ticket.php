@@ -175,4 +175,24 @@ class BFT_OrderTicket extends BFT_Table {
 				wp_get_current_user()->user_login));
 		return $orderTicket;
 	}
+	
+	
+	
+	public function UpdateStatus($status)
+	{
+		global $wpdb;
+		$table_name = $wpdb->prefix . self::$tab_name;
+		
+		if(!$wpdb->update(
+			$table_name,
+			array('Status' => $status),
+			array('PK_ID' => $this->ID),
+			array('%d'),
+			array('%d'))) {
+			BFT_Log::Warn(__CLASS__, "Could not update order ticket status: {$status}, TicketID: {$this->ID}");
+			return false;
+		}
+		BFT_Log::Info(__CLASS__, "Order ticket status updated: {$status}, TicketID: {$this->ID}, User: ".wp_get_current_user()->user_login);
+		return true;
+	}
 }
