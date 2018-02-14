@@ -111,7 +111,7 @@ class BFT_REST_Orders_Controller extends WP_REST_Controller {
 		// Loop orders IDs
 		foreach($orderIDs as $orderId)
 		{
-			array_push($bftOrders, $this->get_order_item($orderId));
+			array_push($bftOrders, $this->get_order_item($orderId, false));
 		}
 		
 		// Create the response object
@@ -122,7 +122,7 @@ class BFT_REST_Orders_Controller extends WP_REST_Controller {
 		return $response;
 	}
 
-	private function get_order_item($key)
+	private function get_order_item($key, $loadNotes)
 	{
 		// Get by order id
 		$order = BFT_Order::GetByID($key);
@@ -137,7 +137,7 @@ class BFT_REST_Orders_Controller extends WP_REST_Controller {
 			}
 		}
 		
-		if(!is_null($order))
+		if(!is_null($order) && $loadNotes)
 		{
 			$order->load_notes();
 		}
@@ -153,7 +153,7 @@ class BFT_REST_Orders_Controller extends WP_REST_Controller {
 			return new WP_Error('bft_rest_missing_arg', __('Order key is missing', 'woocommerce'), array( 'status' => 404) );
 		}
 		
-		$order = $this->get_order_item($request['key']);
+		$order = $this->get_order_item($request['key'], true);
 		
 		// Still not found, return an error!
 		if(is_null($order)) {
