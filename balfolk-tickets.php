@@ -3,7 +3,7 @@
 Plugin Name: Balfolk Tickets
 Plugin URI:  https://github.com/filip-be/Balfolk-Tickets
 Description: WordPress ticketing plugin for balfolk events
-Version:     0.8.13
+Version:     0.8.14
 Author:      Filip Bieleszuk
 Author URI:  https://github.com/filip-be
 License:     GPL3
@@ -32,6 +32,8 @@ class BFT
 	 */
 	static $instance = false;
 	
+	protected $templates;
+	
 	/**
 	 * Constructor
 	 *
@@ -52,6 +54,7 @@ class BFT
 			add_action('admin_head', array($this, 'add_admin_styles'));
 		}
 		
+		// WooCommerce
 		add_filter( 'woocommerce_get_item_data',  array($this, 'render_event_id_on_cart'), 10, 2);
 		add_filter( 'woocommerce_get_cart_item_from_session', array($this, 'update_cart_item_from_session'), 10, 2);
 		add_action( 'woocommerce_checkout_create_order_line_item', array($this, 'save_event_id_meta'), 10, 4 );
@@ -60,6 +63,22 @@ class BFT
 		
 		// Mails
 		add_action( 'woocommerce_email_order_details', array( $this, 'email_order_details' ), 10, 4 );
+		
+		// Custom page template - http://www.wpexplorer.com/wordpress-page-templates-plugin/
+		$this->templates = array();
+		// Add a filter to the attributes metabox to inject template into the cache.
+		// Add a filter to the wp 4.7 version attributes metabox
+		add_filter( 'theme_page_templates', array( $this, 'add_new_template' ) );
+
+		// Add a filter to the save post to inject out template into the page cache
+		add_filter( 'wp_insert_post_data', array( $this, 'register_project_templates' ) );
+
+		// Add a filter to the template include to determine if the page has our 
+		// template assigned and return it's path
+		add_filter( 'template_include', array( $this, 'view_project_template') );
+
+		// Add your templates to this array.
+		$this->templates = array('tickets-template.php' => 'Tickets page');
 	}
 	
 	/**
@@ -186,6 +205,78 @@ class BFT
 		unset($fields['billing_postcode']);
 		
 		return $fields;
+	}
+	
+	/**
+	 * Adds our template to the page dropdown for v4.7+
+	 *
+	 */
+	public function add_new_template( $posts_templates ) {
+		$posts_templates = array_merge( $posts_templates, $this->templates );
+		return $posts_templates;
+	}
+	
+	/**
+	 * Adds our template to the pages cache in order to trick WordPress
+	 * into thinking the template file exists where it doens't really exist.
+	 */
+	public function register_project_templates( $atts ) {
+		// Create the key used for the themes cache
+		$cache_key = 'page_templates-' . md5( get_theme_root() . '/' . get_stylesheet() );
+
+		// Retrieve the cache list. 
+		// If it doesn't exist, or it's empty prepare an array
+		$templates = wp_get_theme()->get_page_templates();
+		if ( empty( $templates ) ) {
+			$templates = array();
+		} 
+
+		// New cache, therefore remove the old one
+		wp_cache_delete( $cache_key , 'themes');
+
+		// Now add our template to the list of templates by merging our templates
+		// with the existing templates array from the cache.
+		$templates = array_merge( $templates, $this->templates );
+
+		// Add the modified cache to allow WordPress to pick it up for listing
+		// available templates
+		wp_cache_add( $cache_key, $templates, 'themes', 1800 );
+
+		return $atts;
+	}
+	
+	/**
+	 * Checks if the template is assigned to the page
+	 */
+	public function view_project_template( $template ) {
+		// Get global post
+		global $post;
+
+		// Return template if post is empty
+		if ( ! $post ) {
+			return $template;
+		}
+
+		// Return default template if we don't have a custom one defined
+		if ( !isset( $this->templates[get_post_meta( 
+			$post->ID, '_wp_page_template', true 
+		)] ) ) {
+			return $template;
+		} 
+
+		$file = plugin_dir_path(__FILE__). get_post_meta( 
+			$post->ID, '_wp_page_template', true
+		);
+
+		// Just to be safe, we check if the file exist first
+		if ( file_exists( $file ) ) {
+			return $file;
+		} else {
+			echo $file;
+		}
+
+		// Return template
+		return $template;
 	}
 	
 /// end class
