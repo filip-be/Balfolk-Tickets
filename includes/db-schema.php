@@ -17,7 +17,7 @@ class BFT_database {
 	private function __construct() {
 	}
 	
-	private static $bft_db_version = '0.1.40';
+	private static $bft_db_version = '0.1.5';
 	
 	/**
 	 * If an instance exists, this returns it.  If not, it creates one and

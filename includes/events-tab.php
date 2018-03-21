@@ -71,7 +71,7 @@ class BFT_EventTab {
 				&& isset($_GET['event']))
 			{
 				// Create new event
-				BFT_Event::SEditName($_GET['event'], $_POST[$field_event_name]);
+				BFT_Event::SEditNameDate($_GET['event'], $_POST[$field_event_name], $_POST[$field_event_name.'_date']);
 				
 				// Put a "event added" message on the screen
 				?><div class="updated"><p><strong><?php _e('Event editted.', 'bft_event' ); ?></strong></p></div><?php
@@ -241,7 +241,10 @@ class BFT_EventTab {
 			<form name="Edit_Event" method="POST" action="">
 				<p>
 					<?php _e("Event name:", 'bft_events' ); ?> 
-					<input type="text" name="<?= $field_event_name; ?>" value="<?= esc_html($event->Name) ?>" size="20">
+					<input type="text" name="<?= $field_event_name; ?>" value="<?= esc_html($event->Name) ?>" size="20"/><br/>
+					<?php _e("Sale start time:", 'bft_events' ); ?> 
+					<input type="datetime-local" name="<?= $field_event_name; ?>_date" value="<?= date("Y-m-d\TH:i:s", strtotime($event->SaleStartDate)) ?>"/> (UTC time)<br/>
+					<br/>
 					<input type="submit" name="Submit" class="button-primary" value="Edit" />
 				</p>
 			</form>

@@ -11,6 +11,7 @@ class BFT_Event extends BFT_Table {
 	public $Name;
 	public $Timestamp;
 	public $Status;
+	public $SaleStartDate;
 	
 	protected static $tab_name = "bft_event";
 	
@@ -22,6 +23,7 @@ class BFT_Event extends BFT_Table {
 			["Name" => "PK_ID", "Type" => "bigint(20)", "Options" => "UNSIGNED NOT NULL AUTO_INCREMENT"]
 			,["Name" => "Name", "Type" => "varchar(200)", "Options" => "NOT NULL"]
 			,["Name" => "Timestamp", "Type" => "datetime", "Options" => "DEFAULT CURRENT_TIMESTAMP NOT NULL"]
+			,["Name" => "SaleStartDate", "Type" => "datetime", "Options" => "DEFAULT CURRENT_TIMESTAMP NULL"]
 			,["Name" => "Status", "Type" => "smallint(4)", "Options" => "NOT NULL DEFAULT 1"]
 		);
 		
@@ -71,19 +73,28 @@ class BFT_Event extends BFT_Table {
 		BFT_Log::Info(__CLASS__, sprintf('Event restored. ID: %d, Name: %s, User: %s', $event->ID, $event->Name, wp_get_current_user()->user_login));
 	}
 	
-	public static function SEditName($_ID, $_Name)
+	public static function SEditNameDate($_ID, $_Name, $_SaleDate)
 	{
 		global $wpdb;
 		$oldEvent = self::GetByID($_ID);
 		
 		$wpdb->update(
 			$wpdb->prefix . self::$tab_name
-			,array('Name' => $_Name)
+			,array
+			(
+				'Name' => $_Name,
+				'SaleStartDate' => date("Y-m-d H:i:s", strtotime($_SaleDate))
+			)
 			,array('PK_ID' => $_ID)
-			,array('%s')
+			,array
+			(
+				'%s',
+				'%s'
+			)
 			,array('%d')
 		);
-		BFT_Log::Info(__CLASS__, sprintf('Event name changed. ID: %d, Name-Old: %s, Name-New: %s, User: %s', $_ID, $oldEvent->Name, $_Name, wp_get_current_user()->user_login));
+		BFT_Log::Info(__CLASS__, sprintf('Event name & date changed. ID: %d, Name-Old: %s, Name-New: %s, SaleStartDate-Old: %s, SaleStartDate-New: %s, User: %s', 
+			$_ID, $oldEvent->Name, $_Name, $oldEvent->SaleStartDate, $_SaleDate, wp_get_current_user()->user_login));
 	}
 	
 	public static function GetByID($event_id)
@@ -102,6 +113,7 @@ class BFT_Event extends BFT_Table {
 		$event->Name = $row->Name;
 		$event->Timestamp = $row->Timestamp;
 		$event->Status = $row->Status;
+		$event->SaleStartDate = $row->SaleStartDate;
 		return $event;
 	}
 	
