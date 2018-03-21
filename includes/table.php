@@ -1,8 +1,9 @@
 <?php
 
 /* Database table base class
- */
- 
+ */ 
+require_once 'log.php';
+
 class BFT_Table {
 	
 	protected $table_name; 	// "Table"
@@ -45,5 +46,7 @@ class BFT_Table {
 				
 		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 		dbDelta( $sql );
+		
+		BFT_Log::Debug('Table.php', $this->table_name . ' created or updated');
 	}
 }

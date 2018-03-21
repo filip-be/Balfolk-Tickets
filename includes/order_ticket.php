@@ -3,13 +3,14 @@
 /* Order ticket class
  */
 require_once 'table.php';
+require_once 'log.php';
 
 class BFT_OrderTicket extends BFT_Table {
 	
 	public function __construct()
 	{
 		parent::__construct();
-		$this->table_name = "bfp_order_ticket";
+		$this->table_name = "bft_order_ticket";
 		$this->columns = array (
 			["Name" => "PK_ID", "Type" => "bigint(20)", "Options" => "UNSIGNED NOT NULL AUTO_INCREMENT"]
 			,["Name" => "FK_EventID", "Type" => "bigint(20)", "Options" => "UNSIGNED NOT NULL"]

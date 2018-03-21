@@ -3,6 +3,7 @@
 /* Ticket class
  */
 require_once 'table.php';
+require_once 'log.php';
 
 class BFT_Ticket extends BFT_Table {
 	
