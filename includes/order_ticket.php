@@ -8,9 +8,9 @@ require_once 'log.php';
 class BFT_OrderTicket extends BFT_Table {
 	
 	public $ID;
-	public $EventID;
 	public $TicketID;
 	public $OrderID;
+	public $OrderItemID;
 	public $Timestamp;
 	public $Status;
 	
@@ -22,18 +22,18 @@ class BFT_OrderTicket extends BFT_Table {
 		$this->table_name = self::$tab_name;
 		$this->columns = array (
 			["Name" => "PK_ID", "Type" => "bigint(20)", "Options" => "UNSIGNED NOT NULL AUTO_INCREMENT"]
-			,["Name" => "FK_EventID", "Type" => "bigint(20)", "Options" => "UNSIGNED NOT NULL"]
 			,["Name" => "FK_TicketID", "Type" => "bigint(20)", "Options" => "UNSIGNED NOT NULL"]
 			,["Name" => "FK_OrderID", "Type" => "bigint(20)", "Options" => "UNSIGNED NOT NULL"]
+			,["Name" => "FK_OrderItemID", "Type" => "bigint(20)", "Options" => "UNSIGNED NOT NULL"]
 			,["Name" => "Timestamp", "Type" => "datetime", "Options" => "DEFAULT CURRENT_TIMESTAMP NOT NULL"]
 			,["Name" => "Status", "Type" => "smallint(4)", "Options" => "NOT NULL DEFAULT 1"]
 		);
 		
 		$this->keys = array (
 			"PRIMARY KEY  (PK_ID)"
-			,"KEY FK_EventID (FK_EventID)"
 			,"KEY FK_TicketID (FK_TicketID)"
 			,"KEY FK_OrderID (FK_OrderID)"
+			,"KEY FK_OrderItemID (FK_OrderItemID)"
 		);
 	}
 	
@@ -42,23 +42,55 @@ class BFT_OrderTicket extends BFT_Table {
 		parent::CreateTable();
 	}
 	
-	// Get order ticket by FK's
-	public static function GetOrderTicket($order_id, $event_id, $ticket_id)
+	// Get order tickets by FK's
+	public static function GetOrderTickets($order_id, $event_id, $product_id, $order_item_id, $quantity)
 	{
 		global $wpdb;
-		$table_name = $wpdb->prefix . self::$tab_name;
-		$query = $wpdb->prepare("SELECT * FROM $table_name WHERE FK_EventID = %d AND FK_TicketID = %d AND FK_OrderID = %d", 
-								$event_id,
-								$ticket_id,
-								$order_id);
-		$row = $wpdb->get_row($query);
-		$orderTicket = self::FromDBRow($row);
-		if(is_null($orderTicket))
+		
+		$ticket = BFT_Ticket::GetByEventIDProductID($event_id, $product_id);
+		
+		if(is_null($ticket))
 		{
-			BFT_Log::Warn(__CLASS__, "Could not find order ticket with OrderID: {$order_id} EventID: {$event_id} TicketID: {$ticket_id}");
-			$orderTicket = self::SCreate($order_id, $event_id, $ticket_id);
+			BFT_Log::Warn(__CLASS__, "Could not find ticket with OrderID: {$order_id} EventID: {$event_id} OrderItemID: {$order_item_id} ProductID: {$product_id}");
+			return null;
 		}
-		return $orderTicket;
+		
+		$table_name = $wpdb->prefix . self::$tab_name;
+		$query = $wpdb->prepare("SELECT * FROM $table_name WHERE FK_TicketID = %d AND FK_OrderID = %d AND FK_OrderItemID = %d", 
+								$ticket->ID,
+								$order_id,
+								$order_item_id);
+		$results = $wpdb->get_results($query);
+		
+		// Initialize array
+		$orderTickets = array();
+		
+		// Numer of order tickets found
+		$order_tickets_found = $wpdb->num_rows;
+		
+		// Iterate results
+		foreach($results as $row)
+		{
+			$orderTicket = self::FromDBRow($row);
+			if(is_null($orderTicket))
+			{
+				BFT_Log::Warn(__CLASS__, "Could not parse order ticket: " . print_r($row, true));
+			}
+			else
+			{
+				$orderTickets[] = $orderTicket;
+			}
+		}
+		
+		// Add missing order tickets
+		while($quantity > 0
+				&& $quantity > $order_tickets_found)
+		{
+			$orderTickets[] = self::SCreate($order_id, $ticket->ID, $order_item_id);
+			$quantity--;
+		}
+		
+		return $orderTickets;
 	}
 	
 	// Get order ticket by ID
@@ -85,24 +117,24 @@ class BFT_OrderTicket extends BFT_Table {
 		}
 		$orderTicket = new self();
 		$orderTicket->ID = $row->PK_ID;
-		$orderTicket->EventID = $row->FK_EventID;
 		$orderTicket->TicketID = $row->FK_TicketID;
 		$orderTicket->OrderID = $row->FK_OrderID;
+		$orderTicket->OrderItemID = $row->FK_OrderItemID;
 		$orderTicket->Timestamp = $row->Timestamp;
 		$orderTicket->Status = $row->Status;
 		return $orderTicket;
 	}
 	
 	// Create order ticket
-	protected static function SCreate($order_id, $event_id, $ticket_id)
+	protected static function SCreate($order_id, $ticket_id, $order_item_id)
 	{
 		global $wpdb;
 		$wpdb->insert(
 			$wpdb->prefix . self::$tab_name
 			,array(
-				'FK_EventID' => $event_id, 
 				'FK_TicketID' => $ticket_id,
 				'FK_OrderID' => $order_id,
+				'FK_OrderItemID' => $order_item_id,
 				'Status' => 1
 			)
 			,array(
@@ -113,10 +145,10 @@ class BFT_OrderTicket extends BFT_Table {
 			)
 		);
 		$orderTicket = self::GetByID($wpdb->insert_id);
-		BFT_Log::Info(__CLASS__, sprintf('New order ticket created. ID: %d, OrderID: %d, EventID: %d, TicketID: %d, User: %s', 
+		BFT_Log::Info(__CLASS__, sprintf('New order ticket created. ID: %d, OrderID: %d, OrderItemID: %d, TicketID: %d, User: %s', 
 				$orderTicket->ID, 
 				$orderTicket->OrderID, 
-				$orderTicket->EventID, 
+				$orderTicket->OrderItemID, 
 				$orderTicket->TicketID, 
 				wp_get_current_user()->user_login));
 		return $orderTicket;
