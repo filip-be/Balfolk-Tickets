@@ -97,7 +97,7 @@ function showTicket() {
 				$thumbnailImg = getImage($thumbnailUri, 65, 65, "vertical-align: top; margin: 0 5px 5px 0;", null);
 				
 				// QR code image
-				$qrCodeImage = getImage("https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl='.$orderTicket->Hash.'&chld=Q|3", 150, 150, null);
+				$qrCodeImage = getImage('https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl='.$orderTicket->Hash.'&chld=Q|3', 150, 150, null);
 				
 				// Page div START
 				print '<div class="ticket">';
