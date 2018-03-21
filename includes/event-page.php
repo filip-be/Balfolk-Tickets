@@ -75,7 +75,7 @@ class BFT_EventPage {
 				<div class="bft-et-td prod-thumb">'.$product->get_image().'</div>
 				<div class="bft-et-td prod-title">'.$product->get_name();
 			if($a['show-description'] == 1) {
-				$res .= '<p class="prod-title-slug bft-p-after">'.$product->get_short_description().'</p>';
+				$res .= '<p class="prod-title-slug bft-p-after">'.nl2br($product->get_short_description()).'</p>';
 			}
 			$res .= '</div>
 				<div class="bft-et-td prod-price"><p class="bft-p-bold">'.__('Price', 'woocommerce').'</p><p class="bft-p-after">'.$product_price.'</p></div>
