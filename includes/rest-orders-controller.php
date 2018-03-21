@@ -76,7 +76,7 @@ class BFT_REST_Orders_Controller extends WP_REST_Controller {
 				'schema' => array( $this, 'get_public_item_schema' ),
 			) );
 			
-			register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<key>[\d]+)', array(
+			register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<key>[a-zA-Z\d_]+)', array(
 				'args' => array(
 					'key' => array(
 						'description' => __( 'Order key', 'woocommerce' ),
