@@ -3,7 +3,7 @@
 Plugin Name: Balfolk Tickets
 Plugin URI:  https://github.com/filip-be/Balfolk-Tickets
 Description: WordPress ticketing plugin for balfolk events
-Version:     0.1.0
+Version:     0.2.0
 Author:      Filip Bieleszuk
 Author URI:  https://github.com/filip-be
 License:     GPL3
@@ -25,7 +25,7 @@ License URI: https://www.gnu.org/licenses/gpl-3.0.en.html
 	along with {Plugin Name}. If not, see {License URI}.
 */
 
-class BF_Tickets
+class BFT
 {
 	/**
 	 * Singleton instance
@@ -33,22 +33,20 @@ class BF_Tickets
 	static $instance = false;
 	
 	/**
-	 * Active plugins
-	 */
-	protected $activePlugins = false;
-	
-	/**
 	 * Constructor
 	 *
 	 * @return void
 	 */
 	private function __construct() {
-		// back end
-		
 		// Check woocommerce
 		if(!self::_is_active_woocommerce()) {
 			add_action('admin_notices', array(__CLASS__, 'required_woocommerce'), 10);
+			return;
 		}
+		
+		// Load additional classes
+		self::loadClasses('includes', array('db-schema.php', 'events-tab.php'));
+				
 		// add_action		( 'plugins_loaded', 					array( $this, 'textdomain'				) 			);
 		// add_action		( 'admin_enqueue_scripts',				array( $this, 'admin_scripts'			)			);
 		// add_action		( 'do_meta_boxes',						array( $this, 'create_metaboxes'		),	10,	2	);
@@ -68,6 +66,18 @@ class BF_Tickets
 		if ( !self::$instance )
 			self::$instance = new self;
 		return self::$instance;
+	}
+	
+	/**
+	 * Load additional classes
+	 */
+	protected static function loadClasses($classesDir, $classes) {
+		$pluginDir = trailingslashit(plugin_dir_path(__FILE__));
+		$classesDir = trailingslashit($classesDir);
+		
+		foreach($classes as $class) {
+			require_once($pluginDir.$classesDir.$class);
+		}
 	}
 	
 	protected function _get_active_and_valid_plugins() {
