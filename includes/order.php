@@ -12,7 +12,11 @@ class BFT_Order {
 	protected static $defaultLanguageSlug = 'pl';
 	
 	// WooCommerce order object
-	public $Worder;
+	private $Worder;
+	public $Tickets;
+	public $Status;
+	public $OrderId;
+	public $Type;
 	
 	public function __construct( )
 	{
@@ -23,11 +27,15 @@ class BFT_Order {
 	{
 		$Order = new self();
 		$Order->Worder = wc_get_order($order_id);
-		if(is_null($Order->Worder))
+		if(is_null($Order->Worder) || $Order->Worder === false)
 		{
 			BFT_Log::Warn(__CLASS__, 'Could not find order with id: ' . $order_id);
 			return null;
 		}
+		$Order->Tickets = $Order->get_tickets();
+		$Order->Status = $Order->get_status();
+		$Order->OrderId = $Order->Worder->get_id();
+		$Order->Type = 'Full';
 		return $Order;
 	}
 	
@@ -40,12 +48,36 @@ class BFT_Order {
 			BFT_Log::Warn(__CLASS__, 'Could not find order with key: ' . $order_key);
 			return null;
 		}
-		$Order = BFT_Order::GetByID($order_id);
+		$Order = self::GetByID($order_id);
+		
+		return $Order;
+	}
+	
+	// Get partial order by order_ticket Hash value
+	public static function GetByTicketHash($order_ticket_hash)
+	{
+		$OrderTicket = BFT_OrderTicket::GetByHash($order_ticket_hash);
+		if(is_null($OrderTicket))
+		{
+			return null;
+		}
+		$FullOrder = self::GetById($OrderTicket->OrderID);
+		if(is_null($FullOrder))
+		{
+			BFT_Log::Warn(__CLASS__, 'Could not find parent order for order ticket ' . $OrderTicket->ID);
+			return null;
+		}
+		$Order = new self();
+		$Order->Tickets = array($OrderTicket);
+		$Order->Status = $FullOrder->Status;
+		$Order->OrderId = $FullOrder->OrderId;
+		$Order->Type = 'Partial';
+		
 		return $Order;
 	}
 	
 	// Get order status
-	public function get_status()
+	protected function get_status()
 	{
 		if(is_null($this->Worder))
 		{
@@ -55,14 +87,8 @@ class BFT_Order {
 		return $this->Worder->get_status();
 	}
 	
-	// Check if order is completed
-	public function is_completed()
-	{
-		return $this->get_status() == 'completed';
-	}
-	
 	// Get tickets
-	public function get_tickets() {
+	protected function get_tickets() {
 		if(is_null($this->Worder))
 		{
 			BFT_Log::Warn(__CLASS__, 'Order is not initialized');
