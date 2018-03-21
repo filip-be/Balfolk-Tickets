@@ -16,6 +16,8 @@ class BFT_EventPage {
 	 * @return void
 	 */
 	private function __construct() {
+		// add_action('wp_enqueue_scripts', BFT::$pluginDir.'public/css/event-page.css');
+		wp_enqueue_style('bftEventPageStyle', plugins_url('public/css/event-page.css', dirname(__FILE__)));
 		add_shortcode('bft_event_tickets', array(__CLASS__, 'event_tickets'));
 	}
 	
@@ -32,6 +34,8 @@ class BFT_EventPage {
 	}
 	
 	public static function event_tickets($atts) {
+		wp_enqueue_script('bftEventPageScript', plugins_url('public/js/event-tickets.js', dirname(__FILE__)));
+		
 		$a = shortcode_atts( array(
 			'id' => 0
 			,'show-description' => 1
@@ -51,12 +55,12 @@ class BFT_EventPage {
 				$res .= '<span class="prod-title-slug">'.$product->get_short_description().'</span>';
 			}
 			$res .= '</td>
-				<td class="prod-qty">QUANTITY</td>
+				<td class="prod-qty"><input type="number" class="input-text qty text" step="1" min="0" max="" name="product[qty]" value="1" size="4" pattern="[0-9]*" inputmode="numeric"></td>
 				<td class="prod-price">'.$product->get_price().' '.get_woocommerce_currency_symbol().'</td>
 				<td class="prod-total">TOTAL</td>
 				<td class="prod-cart"><a class="prod-add-to-cart" href="'.$product->add_to_cart_url().'"/>'.$product->add_to_cart_text().'</a></td>
 			</tr>
-			';
+			';//&quantity=2
 		}
 		$res .= "</tbody>";
 		$res .= "</table>";
