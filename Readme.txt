@@ -1,4 +1,5 @@
 === Balfolk Tickets ===
+<<<<<<< HEAD
 Contributors: filipbe
 Tags: balfolk, ticketing, tickets, event, bal folk
 Requires at least: 4.7
@@ -43,3 +44,5 @@ Required plugins:
 
 = 1.1.3 =
 Valid plugin in the wordpress repository
+=======
+>>>>>>> b37f94b218c14200cb8bfc047fde628ac70a6c9c
