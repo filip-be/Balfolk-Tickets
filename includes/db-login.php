@@ -69,6 +69,24 @@ class BFT_DBLogin {
 				// 'desc' => __( 'Key used to encrypt the DB password', 'woocommerce-settings-tab-bft' ),
 				// 'id'   => 'wc_settings_tab_bft_key'
 			// ),
+			'server' => array(
+				'name' => __( 'IP address', 'woocommerce-settings-tab-bft' ),
+				'type' => 'text',
+				'desc' => __( 'DB server IP address', 'woocommerce-settings-tab-bft' ),
+				'id'   => 'wc_settings_tab_bft_server'
+			),
+			'port' => array(
+				'name' => __( 'Port', 'woocommerce-settings-tab-bft' ),
+				'type' => 'text',
+				'desc' => __( 'DB connection port', 'woocommerce-settings-tab-bft' ),
+				'id'   => 'wc_settings_tab_bft_port'
+			),
+			'database' => array(
+				'name' => __( 'DB name', 'woocommerce-settings-tab-bft' ),
+				'type' => 'text',
+				'desc' => __( 'Database name', 'woocommerce-settings-tab-bft' ),
+				'id'   => 'wc_settings_tab_bft_database'
+			),
 			'section_end' => array(
 				 'type' => 'sectionend',
 				 'id' => 'wc_settings_tab_bft_section_end'
