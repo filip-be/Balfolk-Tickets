@@ -153,6 +153,16 @@ class BFT_Event extends BFT_Table {
 	}
 	
 	public function GetProducts() {
+		global $wpdb;
+		$sql = "SELECT p.* FROM {$wpdb->prefix}posts p ";
+		$sql .= "WHERE p.post_type = 'product' ";
+		$sql .= "AND  EXISTS(SELECT 1 FROM {$wpdb->prefix}bft_ticket t WHERE t.FK_ProductID = p.ID AND t.FK_EventID = {$this->ID} AND t.Status = 1)";
+		$result = $wpdb->get_results( $sql, 'ARRAY_A' );
+		$products = array();
+		foreach($result as $prod) {
+			array_push($products, wc_get_product(pll_get_post($prod['ID'])));
+		}
 		
+		return $products;
 	}
 }
