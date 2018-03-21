@@ -58,7 +58,8 @@ class BFT_EventPage {
 		
 		if($currentDate < $saleStartDate)
 		{
-			$res .= '<div class="bft-event-message">'.pll__('BFTSaleNotStarted').' '.$event->SaleStartDate.' (UTC).</div>';
+			$saleStartDate->setTimeZone(new DateTimeZone('Europe/Warsaw'));
+			$res .= '<div class="bft-event-message">'.pll__('BFTSaleNotStarted').' '.$event->SaleStartDate.' UTC ('.$saleStartDate->format('Y-m-d H:i:s').' CET).</div>';
 		}
 		else
 		{
