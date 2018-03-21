@@ -75,6 +75,30 @@ class BFT_REST_Orders_Controller extends WP_REST_Controller {
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
 			) );
+			
+			register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<key>[\d]+)', array(
+				'args' => array(
+					'key' => array(
+						'description' => __( 'Order key', 'woocommerce' ),
+						'type'        => 'string',
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_order' ),
+					'permission_callback' => array( $this, 'bft_orders_permissions_check' ),
+					'args'                => array(
+						'context' => $this->get_context_param( array( 'default' => 'view' ) ),
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'update_order' ),
+					'permission_callback' => array( $this, 'bft_orders_permissions_check' ),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			) );
 		} );
 	}
 
