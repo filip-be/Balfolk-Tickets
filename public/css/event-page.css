@@ -1,3 +1,108 @@
+DIV.bft-event-tickets{
+	width: 100%;
+	display: table;
+}
+
+DIV.bft-event-tickets .bft-et-head{
+	display: table-header-group;
+	font-weight: bold;
+}
+
+DIV.bft-event-tickets .bft-et-body{
+	display: table-row-group;
+}
+
+DIV.bft-event-tickets .bft-et-foot{
+	display: table-footer-group;
+}
+
+DIV.bft-event-tickets .bft-et-tr{
+	display: table-row;
+}
+
+DIV.bft-event-tickets .bft-et-td{
+	display: table-cell;
+	vertical-align: middle;
+	padding: 5px;
+	margin: 0px;
+}
+
+DIV.bft-event-tickets .prod-total p{
+	margin: 0px;
+	padding: 0px;
+}
+
+DIV.bft-event-tickets p{
+	display: none;
+	margin: 0px;
+}
+
+DIV.bft-event-tickets p.bft-p-after{
+	display: block;
+	width: 100%;
+}
+
+DIV.bft-event-tickets p.bft-p-bold{
+	font-weight: bold;
+}
+
+DIV.bft-event-tickets p.prod-title-slug{
+	display: block;
+	font-size: 0.8em;
+}
+
+DIV.bft-event-tickets .bft-et-head .prod-thumb{
+	width: 60px;
+}
+
+DIV.bft-event-tickets .bft-et-head .prod-title{
+	
+}
+
+DIV.bft-event-tickets .bft-et-head .prod-qty{
+	width: 70px;
+}
+
+DIV.bft-event-tickets .bft-et-head .prod-price{
+	width: 80px;
+}
+
+DIV.bft-event-tickets .bft-et-head .prod-total{
+	width: 80px;
+}
+
+DIV.bft-event-tickets .bft-et-head .prod-cart{
+	width: 160px;
+}
+
+DIV.bft-event-tickets .bft-et-body .prod-cart button{
+	padding: 5px;
+}
+
+@media screen and (max-width: 480px){
+	DIV.bft-event-tickets{
+		width: 100%;
+		display: block;
+	}
+
+	DIV.bft-event-tickets .bft-et-head, DIV.bft-event-tickets .bft-et-foot {
+		display: none;
+	}
+	
+	DIV.bft-event-tickets .bft-et-td {
+		display: block;
+		margin-bottom: 10px;
+	}
+
+	DIV.bft-event-tickets p{
+		display: block;
+	}
+
+	DIV.bft-event-tickets .bft-et-body .prod-cart button{
+		padding: 1em 2em;
+	}
+}
+
 table.tab-events{
 	width: 100%
 }
