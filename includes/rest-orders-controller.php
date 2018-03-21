@@ -137,6 +137,11 @@ class BFT_REST_Orders_Controller extends WP_REST_Controller {
 			}
 		}
 		
+		if(!is_null($order))
+		{
+			$order->load_notes();
+		}
+		
 		return $order;
 	}
 	
