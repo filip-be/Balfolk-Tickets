@@ -66,12 +66,14 @@ class BFT_Events_List extends WP_List_Table {
 
 		if($item['Status'] == 1) {
 			$actions = [
+				'ID' => sprintf( 'ID: %d', absint($item['PK_ID']) ),
 				'edit' => sprintf( '<a href="?page=%s&action=%s&event=%s&_wpnonce=%s">Edit</a>', esc_attr( $_REQUEST['page'] ), 'event-edit', absint( $item['PK_ID'] ), $edit_nonce ),
 				'delete' => sprintf( '<a href="?page=%s&action=%s&event=%s&_wpnonce=%s">Archive</a>', esc_attr( $_REQUEST['page'] ), 'event-archive', absint( $item['PK_ID'] ), $archive_nonce )
 			];
 		}
 		else {
 			$actions = [
+				'ID' => sprintf( 'ID: %d', absint($item['PK_ID']) ),
 				'restore' => sprintf( '<a href="?page=%s&action=%s&event=%s&_wpnonce=%s">Restore</a>', esc_attr( $_REQUEST['page'] ), 'event-restore', absint( $item['PK_ID'] ), $restore_nonce )
 			];
 		}
