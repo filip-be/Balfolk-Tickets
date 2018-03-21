@@ -79,17 +79,14 @@ class BFT_Order {
 		{
 			return null;
 		}
-		$FullOrder = self::GetById($OrderTicket->OrderID);
-		if(is_null($FullOrder))
+		$Order = self::GetById($OrderTicket->OrderID);
+		if(is_null($Order))
 		{
 			BFT_Log::Warn(__CLASS__, 'Could not find parent order for order ticket ' . $OrderTicket->ID);
 			return null;
 		}
-		$Order = new self();
-		$Order->Tickets = array($OrderTicket);
-		$Order->Status = $FullOrder->Status;
-		$Order->OrderId = $FullOrder->OrderId;
 		$Order->LoadOrderData();
+		$Order->Tickets = array($OrderTicket);
 		$Order->Type = 'Partial';
 		
 		return $Order;
