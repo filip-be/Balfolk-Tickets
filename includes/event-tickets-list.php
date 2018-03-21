@@ -199,7 +199,7 @@ class BFT_Event_Tickets_List extends WP_List_Table {
 		/** Process bulk action */
 		$this->process_bulk_action();
 
-		$per_page     = $this->get_items_per_page( 'tickets_per_page', 20 );
+		$per_page     = $this->get_items_per_page( 'tickets_per_page', 100 );
 		$current_page = $this->get_pagenum();
 		$total_items  = $this->record_count();
 
