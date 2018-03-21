@@ -40,19 +40,16 @@ class BFT_Ticket extends BFT_Table {
 	public static function Replace($EventID, $ProductID, $Status)
 	{
 		global $wpdb;
-		$res = $wpdb->replace(
-			$wpdb->prefix . self::$tab_name
-			,array(
-				'FK_EventID' => $EventID, 
-				'FK_ProductID' => $ProductID,
-				'Status' => $Status
-			)
-			,array(
-				'%d',
-				'%d',
-				'%d'
-			)
-		);
+		$table_name = $wpdb->prefix . self::$tab_name;
+		
+		$query = $wpdb->prepare(
+					"INSERT INTO $table_name (FK_EventID, FK_ProductID, Status) VALUES (%d, %d, %d) ON DUPLICATE KEY UPDATE Status = %d",
+					$EventID,
+					$ProductID,
+					$Status,
+					$Status);
+		$res = $wpdb->query($query);
+		
 		$operation = "UNKNOWN OPERATION FOR";
 		if($Status == 1) {
 			$operation = "added to";
