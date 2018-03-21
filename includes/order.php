@@ -111,7 +111,11 @@ class BFT_Order {
 			{
 				BFT_Log::Warn(__CLASS__, "Event ID not saved for the product item! OrderID: {$order_id} ItemID: {$order_item_id}");
 			}
-			$tickets = array_merge($tickets, BFT_OrderTicket::GetOrderTickets($order_id, $event_id, $ticket_id, $order_item_id, $quantity));
+			$orderTickets = BFT_OrderTicket::GetOrderTickets($order_id, $event_id, $ticket_id, $order_item_id, $quantity);
+			if($orderTickets != null)
+			{
+				$tickets = array_merge($tickets, $orderTickets);
+			}
 		}
 		
 		return $tickets;
