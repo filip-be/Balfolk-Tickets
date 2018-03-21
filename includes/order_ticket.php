@@ -11,6 +11,7 @@ class BFT_OrderTicket extends BFT_Table {
 	public $TicketID;
 	public $OrderID;
 	public $OrderItemID;
+	public $Hash;
 	public $Timestamp;
 	public $Status;
 	
@@ -25,6 +26,7 @@ class BFT_OrderTicket extends BFT_Table {
 			,["Name" => "FK_TicketID", "Type" => "bigint(20)", "Options" => "UNSIGNED NOT NULL"]
 			,["Name" => "FK_OrderID", "Type" => "bigint(20)", "Options" => "UNSIGNED NOT NULL"]
 			,["Name" => "FK_OrderItemID", "Type" => "bigint(20)", "Options" => "UNSIGNED NOT NULL"]
+			,["Name" => "Hash", "Type" => "varchar(45)", "Options" => "NULL"]
 			,["Name" => "Timestamp", "Type" => "datetime", "Options" => "DEFAULT CURRENT_TIMESTAMP NOT NULL"]
 			,["Name" => "Status", "Type" => "smallint(4)", "Options" => "NOT NULL DEFAULT 1"]
 		);
@@ -34,6 +36,7 @@ class BFT_OrderTicket extends BFT_Table {
 			,"KEY FK_TicketID (FK_TicketID)"
 			,"KEY FK_OrderID (FK_OrderID)"
 			,"KEY FK_OrderItemID (FK_OrderItemID)"
+			,"KEY FK_Hash (Hash)"
 		);
 	}
 	
@@ -108,6 +111,21 @@ class BFT_OrderTicket extends BFT_Table {
 		return $orderTicket;
 	}
 	
+	// Get order ticket by ID
+	public static function GetByHash($order_ticket_hash)
+	{
+		global $wpdb;
+		$table_name = $wpdb->prefix . self::$tab_name;
+		$query = $wpdb->prepare("SELECT * FROM $table_name WHERE Hash = %s", $order_ticket_hash);
+		$row = $wpdb->get_row($query);
+		$orderTicket = self::FromDBRow($row);
+		if(is_null($orderTicket))
+		{
+			BFT_Log::Warn(__CLASS__, 'Could not find order ticket with hash: ' . $order_ticket_hash);
+		}
+		return $orderTicket;
+	}
+	
 	// Initialize from DB row
 	protected static function FromDBRow($row)
 	{
@@ -120,6 +138,7 @@ class BFT_OrderTicket extends BFT_Table {
 		$orderTicket->TicketID = $row->FK_TicketID;
 		$orderTicket->OrderID = $row->FK_OrderID;
 		$orderTicket->OrderItemID = $row->FK_OrderItemID;
+		$orderTicket->Hash = $row->Hash;
 		$orderTicket->Timestamp = $row->Timestamp;
 		$orderTicket->Status = $row->Status;
 		return $orderTicket;
@@ -135,21 +154,24 @@ class BFT_OrderTicket extends BFT_Table {
 				'FK_TicketID' => $ticket_id,
 				'FK_OrderID' => $order_id,
 				'FK_OrderItemID' => $order_item_id,
+				'Hash' => uniqid(),
 				'Status' => 1
 			)
 			,array(
 				'%d',
 				'%d',
 				'%d',
+				'%s',
 				'%d'
 			)
 		);
 		$orderTicket = self::GetByID($wpdb->insert_id);
-		BFT_Log::Info(__CLASS__, sprintf('New order ticket created. ID: %d, OrderID: %d, OrderItemID: %d, TicketID: %d, User: %s', 
+		BFT_Log::Info(__CLASS__, sprintf('New order ticket created. ID: %d, OrderID: %d, OrderItemID: %d, TicketID: %d, Hash: %s, User: %s', 
 				$orderTicket->ID, 
 				$orderTicket->OrderID, 
 				$orderTicket->OrderItemID, 
 				$orderTicket->TicketID, 
+				$orderTicket->Hash, 
 				wp_get_current_user()->user_login));
 		return $orderTicket;
 	}
