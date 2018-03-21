@@ -64,13 +64,26 @@ class BFT_EventTab {
 		// );
 	}
 	
-	public static function _process_request_actions($field_event_name) {
+	protected static function _process_events_actions($field_event_name) {
 		if( isset($_POST[$field_event_name]) && strlen($_POST[$field_event_name]) > 0) {
-			// Create new event
-			BFT_Event::Create($_POST[$field_event_name]);
-			
-			// Put a "event added" message on the screen
-			?><div class="updated"><p><strong><?php _e('Event added.', 'bft_event' ); ?></strong></p></div><?php
+			if(isset($_GET['action'])
+				&& $_GET['action'] == 'event-edit'
+				&& isset($_GET['event']))
+			{
+				// Create new event
+				BFT_Event::SEditName($_GET['event'], $_POST[$field_event_name]);
+				
+				// Put a "event added" message on the screen
+				?><div class="updated"><p><strong><?php _e('Event editted.', 'bft_event' ); ?></strong></p></div><?php
+			}
+			else
+			{
+				// Create new event
+				BFT_Event::SCreate($_POST[$field_event_name]);
+				
+				// Put a "event added" message on the screen
+				?><div class="updated"><p><strong><?php _e('Event added.', 'bft_event' ); ?></strong></p></div><?php
+			}
 		}
 		
 		// Single event archived
@@ -79,7 +92,7 @@ class BFT_EventTab {
 			&& isset($_GET['event'])
 			&& isset($_GET['_wpnonce'])
 			&& wp_verify_nonce(esc_attr($_GET['_wpnonce']), 'bft_archive_event')) {
-			BFT_Event::Archive($_GET['event']);
+			BFT_Event::SArchive($_GET['event']);
 			?><div class="updated"><p><strong><?php _e('Event archived.', 'bft_event' ); ?></strong></p></div><?php
 		}
 		// Single event restored
@@ -88,7 +101,7 @@ class BFT_EventTab {
 			&& isset($_GET['event'])
 			&& isset($_GET['_wpnonce'])
 			&& wp_verify_nonce(esc_attr($_GET['_wpnonce']), 'bft_restore_event')) {
-			BFT_Event::Restore($_GET['event']);
+			BFT_Event::SRestore($_GET['event']);
 			?><div class="updated"><p><strong><?php _e('Event restored.', 'bft_event' ); ?></strong></p></div><?php
 		}
 		// Bulk event archive
@@ -96,7 +109,7 @@ class BFT_EventTab {
 			&& $_POST['action'] == 'bulk-event-archive'
 			&& isset($_POST['bulk-event-archive'])) {
 			foreach($_POST['bulk-event-archive'] as $eventID) {
-				BFT_Event::Archive($eventID);
+				BFT_Event::SArchive($eventID);
 			}
 			?><div class="updated"><p><strong><?php _e('Events archived.', 'bft_event' ); ?></strong></p></div><?php
 		}
@@ -105,9 +118,64 @@ class BFT_EventTab {
 			&& $_POST['action'] == 'bulk-event-restore'
 			&& isset($_POST['bulk-event-archive'])) {
 			foreach($_POST['bulk-event-archive'] as $eventID) {
-				BFT_Event::Restore($eventID);
+				BFT_Event::SRestore($eventID);
 			}
 			?><div class="updated"><p><strong><?php _e('Events restored.', 'bft_event' ); ?></strong></p></div><?php
+		}
+	}
+	
+	protected static function _process_event_actions($field_event_name)
+	{
+		if(isset($_GET['action'])
+			&& $_GET['action'] == 'event-edit'
+			&& isset($_GET['event']))
+		{
+			$event = BFT_Event::GetByID($_GET['event']);
+			// Single ticket add
+			if(isset($_GET['eventAction'])
+				&& $_GET['eventAction'] == 'event-ticket-add'
+				&& isset($_GET['ticket'])
+				&& isset($_GET['_wpnonce'])
+				&& wp_verify_nonce(esc_attr($_GET['_wpnonce']), 'bft_add_product'))
+			{
+				$event->AddProduct($_GET['ticket']);
+				?><div class="updated"><p><strong><?php _e('Ticket added.', 'bft_event' ); ?></strong></p></div><?php
+			}
+			
+			// Single ticket remove
+			if(isset($_GET['eventAction'])
+				&& $_GET['eventAction'] == 'event-ticket-remove'
+				&& isset($_GET['ticket'])
+				&& isset($_GET['_wpnonce'])
+				&& wp_verify_nonce(esc_attr($_GET['_wpnonce']), 'bft_remove_product'))
+			{
+				$event->RemoveProduct($_GET['ticket']);
+				?><div class="updated"><p><strong><?php _e('Ticket removed.', 'bft_event' ); ?></strong></p></div><?php
+			}
+			
+			// Multiple ticket add
+			if(isset($_POST['action'])
+				&& $_POST['action'] == 'bulk-ticket-add'
+				&& isset($_POST['bulk-action'])
+				&& isset($_POST['_wpnonce']))
+			{
+				foreach($_POST['bulk-action'] as $productID) {
+					$event->AddProduct($productID);
+				}
+				?><div class="updated"><p><strong><?php _e('Tickets added.', 'bft_event' ); ?></strong></p></div><?php
+			}
+			
+			// Multiple ticket add
+			if(isset($_POST['action'])
+				&& $_POST['action'] == 'bulk-ticket-remove'
+				&& isset($_POST['bulk-action'])
+				&& isset($_POST['_wpnonce']))
+			{
+				foreach($_POST['bulk-action'] as $productID) {
+					$event->RemoveProduct($productID);
+				}
+				?><div class="updated"><p><strong><?php _e('Tickets removed.', 'bft_event' ); ?></strong></p></div><?php
+			}
 		}
 	}
 	
@@ -120,21 +188,22 @@ class BFT_EventTab {
 		
 		// Process POST/GET actions
 		$field_event_name = 'bft_event_name';
-		self::_process_request_actions($field_event_name);
+		self::_process_events_actions($field_event_name);
+		self::_process_event_actions($field_event_name);
 		
 		if(isset($_GET['action'])
 			&& $_GET['action'] == 'event-edit'
 			&& isset($_GET['event']))
 		{
-			self::print_event_page($_GET['event']);
+			self::print_event_page($_GET['event'], $field_event_name);
 		}
 		else
 		{
-			self::print_events_page();
+			self::print_events_page($field_event_name);
 		}
 	}
 	
-	public static function print_events_page() {
+	public static function print_events_page($field_event_name) {
 		?>
 		<div class="wrap">
 			<h1><?= esc_html(get_admin_page_title()); ?></h1>
@@ -164,57 +233,36 @@ class BFT_EventTab {
 		<?php
 	}
 	
-	public static function print_event_page($eventID) {
-		// NOT IMPLEMENTED YET
-	}
-	
-	// OLD FUNCTION - TO REMOVE
-	public static function _event_page()
-	{
-		// Check user capabilities
-		if (!current_user_can('view_woocommerce_reports')) {
-			wp_die( __('You do not have sufficient permissions to access this page.') );
-		}
-		
-		if(!isset($_POST["EventID"])) {
-			wp_die(__('This page can be entered only by selecting event in "Balfolk events" page.'));
-		}
-
-		$EventID = $_POST["EventID"];
-		$event = BFT_Event::GetByID($_POST["EventID"]);
-		
-		if( false ) {
-			// Put a "settings saved" message on the screen
-			?><div class="updated"><p><strong><?php _e('Event added.', 'bft_event' ); ?></strong></p></div><?php
-		}
-
-		// Now display the settings editing screen?>
+	public static function print_event_page($eventID, $field_event_name) {
+		$event = BFT_Event::GetByID($eventID);
+		?>
 		<div class="wrap">
-			<h1><?= esc_html(get_admin_page_title()); ?></h1>
-			<form name="EditEvent" method="POST" action="">
-				<input type="hidden" name="EventID" value="<?= $EventID ?>">
+			<h1><?= esc_html($event->Name) ?> - edit event</h1>
+			<form name="Edit_Event" method="POST" action="">
 				<p>
-					<?php _e("Event name:", 'bft_event' ); ?> 
-					<input type="text" name="bft_name" value="<?= $event->Name ?>" size="20">
+					<?php _e("Event name:", 'bft_events' ); ?> 
+					<input type="text" name="<?= $field_event_name; ?>" value="<?= esc_html($event->Name) ?>" size="20">
+					<input type="submit" name="Submit" class="button-primary" value="Edit" />
 				</p>
-				<p><input type="submit" name="Submit" class="button-primary" value="Update" /></p>
 			</form>
 			<hr />
-			<?// Display existing events - EDIT / REMOVE
-				$EventTickets = new BFT_Event_Tickets_List();
-				$EventTickets->prepare_items($EventID, false);
-				$EventTickets->display();
-				// $args = array( 'post_type' => 'product', 'posts_per_page' => 10 );
-				// $loop = new WP_Query( $args );
-
-				// while ( $loop->have_posts() ) : $loop->the_post(); 
-					// global $product; 
-					// echo '<br /><a href="'.get_permalink().'">' . woocommerce_get_product_thumbnail().' '.get_the_title().'</a>';
-				// endwhile; 
-
-
-				// wp_reset_query(); 
+			<h2>Connected products</h2>
+			<form name="event-tickets-edit" method="POST" action="">
+			<?php
+				$tickets_list = new BFT_Event_Tickets_List($event->ID, true);
+				$tickets_list->prepare_items();
+				$tickets_list->display();
 			?>
+			</form>
+			<hr/>
+			<h2>Add products</h2>
+			<form name="event-tickets-add" method="POST" action="">
+			<?php
+				$tickets_list = new BFT_Event_Tickets_List($event->ID, false);
+				$tickets_list->prepare_items();
+				$tickets_list->display();
+			?>
+			</form>
 		</div>
 		<?php
 	}
