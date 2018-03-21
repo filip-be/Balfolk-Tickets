@@ -3,7 +3,7 @@
 Plugin Name: Balfolk Tickets
 Plugin URI:  https://github.com/filip-be/Balfolk-Tickets
 Description: WordPress ticketing plugin for balfolk events
-Version:     0.7.6
+Version:     0.7.7
 Author:      Filip Bieleszuk
 Author URI:  https://github.com/filip-be
 License:     GPL3
@@ -40,7 +40,7 @@ class BFT
 	private function __construct() {
 		// Check woocommerce
 		if(!self::_is_active_woocommerce()) {
-			add_action('admin_notices', array(__CLASS__, 'required_woocommerce'), 10);
+			add_action('admin_notices', array($this, 'required_woocommerce'), 10);
 			return;
 		}
 		
@@ -49,12 +49,13 @@ class BFT
 		
 		// Load style for admin pages
 		if(is_admin()) {
-			add_action('admin_head', array(__CLASS__, 'add_admin_styles'));
+			add_action('admin_head', array($this, 'add_admin_styles'));
 		}
 		
-		add_filter( 'woocommerce_get_item_data',  array(__CLASS__, 'render_event_id_on_cart'), 10, 2);
-		add_filter( 'woocommerce_get_cart_item_from_session', array(__CLASS__, 'update_cart_item_from_session'), 10, 2);
-		add_action( 'woocommerce_thankyou', array(__CLASS__, 'order_completed'), 10, 1);
+		add_filter( 'woocommerce_get_item_data',  array($this, 'render_event_id_on_cart'), 10, 2);
+		add_filter( 'woocommerce_get_cart_item_from_session', array($this, 'update_cart_item_from_session'), 10, 2);
+		add_action( 'woocommerce_checkout_create_order_line_item', array($this, 'save_event_id_meta'), 10, 4 );
+		add_action( 'woocommerce_thankyou', array($this, 'order_completed'), 10, 1);
 	}
 	
 	/**
@@ -150,6 +151,12 @@ class BFT
 			$cart_item['btf-event-id'] = $values['btf-event-id'];
 		}
 		return $cart_item;
+	}
+	
+	public function save_event_id_meta( $item, $cart_item_key, $values, $order) {
+		if(isset($values['bft-event-id'])) {
+			$item->add_meta_data('_bft-event-id', $values['bft-event-id']);
+		}
 	}
 	
 	public function order_completed( $order_id ) {
