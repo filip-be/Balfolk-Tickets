@@ -3,7 +3,7 @@
 Plugin Name: Balfolk Tickets
 Plugin URI:  https://github.com/filip-be/Balfolk-Tickets
 Description: WordPress ticketing plugin for balfolk events
-Version:     1.0.1
+Version:     1.0.2
 Author:      Filip Bieleszuk
 Author URI:  https://github.com/filip-be
 License:     GPL3
@@ -64,6 +64,9 @@ class BFT
 		add_action( 'woocommerce_checkout_create_order_line_item', array($this, 'save_event_id_meta'), 10, 4 );
 		add_action( 'woocommerce_thankyou', array($this, 'order_completed'), 10, 1);
 		add_action( 'woocommerce_billing_fields', array($this, 'remove_address_fields'), 10, 1);
+		add_action( 'woocommerce_after_order_notes', array($this, 'add_order_notes'), 10, 1);
+		add_action( 'woocommerce_checkout_process', array($this, 'wc_checkout_process'), 10, 0);
+		add_action( 'woocommerce_checkout_update_order_meta', array($this, 'wc_checkout_update_meta'), 10, 1);
 		
 		// Mails
 		add_action( 'woocommerce_email_order_details', array( $this, 'email_order_details' ), 10, 4 );
@@ -302,6 +305,31 @@ class BFT
 		return $fields;
 	}
 	
+	public function add_order_notes( $checkout ) {
+		if(pll__('BFTAdditionalAgree') != 'BFTAdditionalAgree') {
+			woocommerce_form_field( 'bft_additional_check', array(
+				'type'          => 'checkbox',
+				'class'         => array('input-checkbox'),
+				'label'         => pll__('BFTAdditionalAgree'),
+				'required'  => true,
+			), $checkout->get_value( 'bft_additional_check' ));
+		}
+	}
+	
+	public function wc_checkout_process() {
+		global $woocommerce;
+
+		// Check if set, if its not set add an error.
+		if (pll__('BFTAdditionalAgree') != 'BFTAdditionalAgree' && 
+			(!isset($_POST['bft_additional_check']) || !$_POST['bft_additional_check']))
+			wc_add_notice( pll__('BFTAdditionalAgreeMissing'), 'error' );
+	}
+	
+	public function wc_checkout_update_meta( $order_id ) {
+		if ($_POST['bft_additional_check']) 
+			update_post_meta( $order_id, 'BFT Additional Check', esc_attr($_POST['bft_additional_check']));
+	}
+	
 	public function polylang_register_strings() {
 		pll_register_string('woocommerce_order_notes_placeholder', 'Notes about your order.');
 		pll_register_string('bft_ticket_generator_uri', 'BFTTicketGeneratorURI', 'Bal Folk Tickets');
@@ -310,6 +338,9 @@ class BFT
 		pll_register_string('bft_ticket_order_completed_text', 'BFTOrderCompletedText', 'Bal Folk Tickets');
 		pll_register_string('bft_ticket_ticket', 'BFTTicket', 'Bal Folk Tickets');
 		pll_register_string('bft_ticket_sale_not_starte_message', 'BFTSaleNotStarted', 'Bal Folk Tickets');
+		pll_register_string('bft_order_additional_agree', 'BFTAdditionalAgree', 'Bal Folk Tickets');
+		pll_register_string('bft_order_additional_agree_missing', 'BFTAdditionalAgreeMissing', 'Bal Folk Tickets');
+		pll_register_string('bft_product_not_available', 'BFTProductNotAvailable', 'Bal Folk Tickets');
 	}
 	
 /// end class
