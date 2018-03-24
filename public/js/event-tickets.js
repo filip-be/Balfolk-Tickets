@@ -9,4 +9,20 @@ jQuery(document).ready(function($){
 				+ " " + $total.data("symbol")
 		);
 	});
+	
+	$(".prod-price.bft-open-price input").change(function() {
+		$total = $(this)
+			.closest('form.cart')
+			.find('.prod-total p.bft-total');
+		$quantity = $(this)
+			.closest('form.cart')
+			.find('.prod-qty .quantity input');
+		
+		$total.data("price", $(this).val())
+		
+		$total.text(
+				($quantity.val() * $total.data("price")) 
+				+ " " + $total.data("symbol")
+		);
+	});
 });
