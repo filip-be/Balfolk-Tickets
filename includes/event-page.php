@@ -93,18 +93,40 @@ class BFT_EventPage {
 				if($a['show-description'] == 1) {
 					$res .= '<p class="prod-title-slug bft-p-after">'.nl2br($product->get_short_description()).'</p>';
 				}
-				$res .= '</div>
-					<div class="bft-et-td prod-price"><p class="bft-p-bold">'.__('Price', 'woocommerce').'</p><p class="bft-p-after">'.$product_price.'</p></div>
-					<div class="bft-et-td prod-qty"><p class="bft-p-bold">'.__('Quantity', 'woocommerce').'</p>'.woocommerce_quantity_input( array('min_value' => 1), $product, false ).'</div>
-					<div class="bft-et-td prod-total"><p class="bft-p-bold">'.__('Total', 'woocommerce').'</p><p class="bft-total bft-p-after" data-symbol="'.get_woocommerce_currency_symbol().'" data-price="'.$product->get_price().'">'.$product_price.'</p></div>';
-					if($stillAvailable)
-					{
-						$res .= '<div class="bft-et-td prod-cart"><button type="submit" name="add-to-cart" value="'.$originalProductId.'" class="single_add_to_cart_button button alt">'.$product->add_to_cart_text().'</button></div>';
-					}
-					else
-					{
-						$res .= '<div class="bft-et-td prod-cart">'.pll__('BFTProductNotAvailable').'</div>';
-					}
+				$res .= '</div>';
+				if(self::is_open_price_product($originalProduct))
+				{
+					$res .= '<div class="bft-et-td prod-price bft-open-price"><p class="bft-p-bold">'.__('Price', 'woocommerce').'</p><p class="bft-p-after">';
+					
+					global $post;
+					$originalPost = $post;
+					$post = get_post($originalProductId, OBJECT);
+					
+					ob_start();
+					do_action('woocommerce_before_add_to_cart_button');
+					$res .= ob_get_contents();
+					ob_end_clean();
+					
+					$post = $originalPost;
+					
+					$res .= '</p></div>';
+				}
+				else
+				{
+					$res .= '<div class="bft-et-td prod-price"><p class="bft-p-bold">'.__('Price', 'woocommerce').'</p><p class="bft-p-after">'.$product_price.'</p></div>';
+				}
+				
+				$res .= '<div class="bft-et-td prod-qty"><p class="bft-p-bold">'.__('Quantity', 'woocommerce').'</p>'.woocommerce_quantity_input( array('min_value' => 1), $product, false ).'</div>
+				<div class="bft-et-td prod-total"><p class="bft-p-bold">'.__('Total', 'woocommerce').'</p><p class="bft-total bft-p-after" data-symbol="'.get_woocommerce_currency_symbol().'" data-price="'.$product->get_price().'">'.$product_price.'</p></div>';
+					
+				if($stillAvailable)
+				{
+					$res .= '<div class="bft-et-td prod-cart"><button type="submit" name="add-to-cart" value="'.$originalProductId.'" class="single_add_to_cart_button button alt">'.pll__('BFTAddToCart').'</button></div>';
+				}
+				else
+				{
+					$res .= '<div class="bft-et-td prod-cart">'.pll__('BFTProductNotAvailable').'</div>';
+				}
 				$res .= '</form>';
 			}
 			$res .= "</div>";	//bft-et-body
@@ -112,6 +134,32 @@ class BFT_EventPage {
 			$res .= "</div>";	//bft-event-tickets
 		}
 		return $res;
+	}
+	
+	/**
+	 * Product Open Pricing for WooCommerce - Core Class
+	 *
+	 * @version 1.1.1
+	 * @since   1.0.0
+	 * @author  Algoritmika Ltd.
+	 * is_open_price_product.
+	 *
+	 * @version 1.1.0
+	 * @since   1.0.0
+	 */
+	protected static function is_open_price_product( $_product ) {
+		return ( 'yes' === get_post_meta( self::get_product_or_variation_parent_id( $_product ), '_' . 'alg_wc_product_open_pricing_enabled', true ) );
+	}
+	
+	/**
+	 * get_product_or_variation_parent_id.
+	 *
+	 * @version 1.1.0
+	 * @since   1.1.0
+	 * @todo    (maybe) just product id (i.e. no parent for variation)
+	 */
+	protected static function get_product_or_variation_parent_id( $_product ) {
+		return ( $_product->is_type( 'variation' ) ? $_product->get_parent_id() : $_product->get_id() );
 	}
  }
  

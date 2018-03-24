@@ -23,7 +23,9 @@ Provided additions:
 Required plugins:
 *	WooCommerce
 *	Polylang
-*	Hyyan WooCommerce Polylang Integration
+
+Additional supported plugins:
+*	Product Open Pricing (Name Your Price) for WooCommerce
 
 == Installation ==
 
@@ -32,6 +34,11 @@ Required plugins:
 3. Update the string translations if required (Languages -> Strings translations)
 
 == Changelog ==
+
+= 1.1.5 =
+* Removed dependency for Hyyan WooCommerce Polylang Integration
+* Custom text for "add to card" button
+* Support for additonal plugin added: Product Open Pricing (Name Your Price) for WooCommerce
 
 = 1.1.4 =
 * Updated readme
