@@ -25,7 +25,8 @@ Required plugins:
 *	Polylang
 
 Additional supported plugins:
-*	Product Open Pricing (Name Your Price) for WooCommerce
+*	Product Open Pricing (Name Your Price) for WooCommerce (not working together with Hyyan WooCommerce Polylang Integration)
+*	Hyyan WooCommerce Polylang Integration (not working together with Product Open Pricing (Name Your Price) for WooCommerce)
 
 == Installation ==
 
@@ -34,6 +35,9 @@ Additional supported plugins:
 3. Update the string translations if required (Languages -> Strings translations)
 
 == Changelog ==
+
+= 1.1.6 =
+* Bugfix: find default language slug
 
 = 1.1.5 =
 * Removed dependency for Hyyan WooCommerce Polylang Integration

@@ -9,8 +9,6 @@ require_once 'log.php';
 
 class BFT_Order {
 	
-	protected static $defaultLanguageSlug = 'pl';
-	
 	// WooCommerce order object
 	private $Worder;
 	public $Tickets;
@@ -109,6 +107,12 @@ class BFT_Order {
 		return $this->Worder->get_status();
 	}
 	
+	// Get default language slug
+	protected static function getDefaultLanguageSlug()
+	{
+		return pll_default_language('slug');
+	}	
+	
 	// Get tickets
 	public function get_tickets() {
 		if(is_null($this->Worder))
@@ -126,7 +130,7 @@ class BFT_Order {
 		// Loop through order items
 		foreach($this->Worder->get_items() as $item) {
 			$order_item_id = $item->get_id();
-			$ticket_id = pll_get_post($item->get_product_id(), self::$defaultLanguageSlug);
+			$ticket_id = pll_get_post($item->get_product_id(), self::getDefaultLanguageSlug());
 			$event_id = $item->get_meta('_bft-event-id');
 			$quantity = $item->get_quantity();
 			if(is_null($event_id))
