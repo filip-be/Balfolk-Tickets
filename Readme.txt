@@ -36,6 +36,9 @@ Additional supported plugins:
 
 == Changelog ==
 
+= 1.1.7 =
+* Remove product link from order summary table
+
 = 1.1.6 =
 * Bugfix: find default language slug
 
