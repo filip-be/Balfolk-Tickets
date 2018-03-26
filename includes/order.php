@@ -9,7 +9,7 @@ require_once 'log.php';
 
 class BFT_Order {
 	
-	protected static $defaultLanguageSlug = 'pl';
+	protected static $defaultLanguageSlug = pll_default_language('slug');
 	
 	// WooCommerce order object
 	private $Worder;
