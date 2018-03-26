@@ -3,7 +3,7 @@
 Plugin Name: Balfolk Tickets
 Plugin URI:  https://github.com/filip-be/Balfolk-Tickets
 Description: WordPress ticketing plugin for balfolk events
-Version:     1.1.6
+Version:     1.1.7
 Author:      Filip Bieleszuk
 Author URI:  https://github.com/filip-be
 License:     GPL3
@@ -67,6 +67,7 @@ class BFT
 		add_action( 'woocommerce_after_order_notes', array($this, 'add_order_notes'), 10, 1);
 		add_action( 'woocommerce_checkout_process', array($this, 'wc_checkout_process'), 10, 0);
 		add_action( 'woocommerce_checkout_update_order_meta', array($this, 'wc_checkout_update_meta'), 10, 1);
+		add_filter( 'woocommerce_order_item_name', array($this, 'wc_remove_permalink_order_table'), 10, 3 );
 		
 		// Mails
 		add_action( 'woocommerce_email_order_details', array( $this, 'email_order_details' ), 10, 4 );
@@ -327,6 +328,11 @@ class BFT
 	public function wc_checkout_update_meta( $order_id ) {
 		if ($_POST['bft_additional_check']) 
 			update_post_meta( $order_id, 'BFT Additional Check', 1 );
+	}
+	
+	public function wc_remove_permalink_order_table($name, $item, $order ) {
+		$name = $item['name'];
+		return $name;
 	}
 	
 	public function polylang_register_strings() {
