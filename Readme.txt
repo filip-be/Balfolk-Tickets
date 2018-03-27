@@ -36,6 +36,9 @@ Additional supported plugins:
 
 == Changelog ==
 
+= 1.1.8 =
+* Remove product link from cart
+
 = 1.1.7 =
 * Remove product link from order summary table
 
