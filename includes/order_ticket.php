@@ -14,7 +14,7 @@ class BFT_OrderTicket extends BFT_Table {
 	public $Hash;
 	public $Timestamp;
 	public $Status;
-	
+		
 	protected static $tab_name = "bft_order_ticket";
 	
 	public function __construct()
@@ -97,7 +97,7 @@ class BFT_OrderTicket extends BFT_Table {
 	}
 	
 	// Get order ticket by ID
-	protected static function GetByID($order_ticket_id)
+	public static function GetByID($order_ticket_id)
 	{
 		global $wpdb;
 		$table_name = $wpdb->prefix . self::$tab_name;

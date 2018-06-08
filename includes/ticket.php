@@ -76,6 +76,27 @@ class BFT_Ticket extends BFT_Table {
 		return $ticket;
 	}
 	
+	public static function GetAvailableProducts()
+	{
+		global $wpdb;
+		$table_name = $wpdb->prefix . self::$tab_name;
+		$query = "SELECT DISTINCT FK_ProductID FROM $table_name WHERE Status = 1";
+		$rows = $wpdb->get_results($query);
+		
+		$products = array();
+		
+		foreach($rows as $product)
+		{
+			$wcProduct = wc_get_product($product->FK_ProductID);
+			if($wcProduct != null && $wcProduct != false)
+			{
+				array_push($products, $wcProduct);
+			}
+		}
+		
+		return $products;
+	}
+	
 	// Get ticket by ID
 	public static function GetByEventIDProductID($event_id, $product_id)
 	{
