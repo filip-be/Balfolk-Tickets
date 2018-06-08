@@ -3,7 +3,9 @@
 /* Include / remove events tab
  */
 require_once 'event.php';
+require_once 'ticket.php';
 require_once 'events-list.php';
+require_once 'tickets-list.php';
 require_once 'event-tickets-list.php';
  
 class BFT_EventTab {
@@ -45,8 +47,8 @@ class BFT_EventTab {
 	public static function _create_events_menu() {
 		// make the main menu item
 		add_menu_page(
-			'Balfolk Events',
-			'Balfolk Events',
+			'Balfolk events',
+			'Balfolk events',
 			'view_woocommerce_reports',
 			'balfolk-events',
 			array( __CLASS__, '_events_page' ),
@@ -54,14 +56,24 @@ class BFT_EventTab {
 			21
 		);
 		
-		// add_submenu_page(
-			// 'balfolk-events'
-			// ,'Edit event'
-			// ,null
-			// ,'view_woocommerce_reports'
-			// ,'balfolk-event'
-			// ,array( __CLASS__, '_event_page')
-		// );
+		add_submenu_page(
+			'balfolk-events'
+			,'Edit events'
+			,'Edit events'
+			,'view_woocommerce_reports'
+			,'balfolk-events'
+			,array( __CLASS__, '_events_page')
+		);
+		
+		
+		add_submenu_page(
+			'balfolk-events'
+			,'View tickets'
+			,'View tickets'
+			,'view_woocommerce_reports'
+			,'balfolk-events-export'
+			,array( __CLASS__, '_tickets_page')
+		);
 	}
 	
 	protected static function _process_events_actions($field_event_name) {
@@ -269,6 +281,101 @@ class BFT_EventTab {
 		</div>
 		<?php
 	}
+	
+	protected static function _process_tickets_actions() {
+		if(!empty($_POST['action'])
+			&& $_POST['action'] != -1
+			&& !empty($_POST['bulk-ticket-update']))
+		{
+			$newStatus = $_POST['action'] == 'bulk-ticket-check' ? 2 : 1;
+			
+			foreach($_POST['bulk-ticket-update'] as $ticketID)
+			{
+				$ticket = BFT_OrderTicket::GetByID($ticketID);
+				$ticket->UpdateStatus($newStatus);
+			}
+		}
+		else if(!empty($_GET['action'])
+			&& $_GET['action'] != -1
+			&& !empty($_GET['ticket']))
+		{
+			$newStatus = $_GET['action'] == 'ticket-check' ? 2 : 1;
+			
+			$ticket = BFT_OrderTicket::GetByID($_GET['ticket']);
+			$ticket->UpdateStatus($newStatus);
+		}
+	}
+	
+	protected static function IsChecked($postData, $value)
+	{
+		if(!empty($postData))
+		{
+			foreach($postData as $data)
+			{
+				if($data == $value)
+				{
+					return 'checked';
+				}
+			}
+			return '';
+		}
+		else
+		{	
+			return 'checked';
+		}
+	}
+	
+	public static function print_tickets_page() {
+		// Get available tickets
+		$products = BFT_Ticket::GetAvailableProducts();
+		?>
+		<h1><?= esc_html(get_admin_page_title()); ?></h1>
+		<div class="wrap">
+			<form name="events-edit" method="POST" action="">
+				<p>
+				<?php
+					foreach($products as $product)
+					{
+						echo '<input type="checkbox" id="ticket-name'.$product->get_id().'" name="ticket-name[]" value="'.$product->get_id().'" '.self::IsChecked($_POST['ticket-name'], $product->get_id()).' />';
+						echo '<label for="ticket-name'.$product->get_id().'">'.$product->get_name().'</label>';
+						echo "<br/>";
+					}
+				?>
+					<br/>
+					<input type="submit" name="tickets-filter-action" class="button" value="Filter" />
+				</p>
+				<hr />
+			<?php
+				$FilterStatus = 1;
+				if(isset($_POST["events-filter-action"])
+					&& $_POST["events-filter-action"] == 'Filter'
+					&& isset($_POST["events-filter"])) {
+					$FilterStatus = $_POST["events-filter"];
+				}
+				
+				$events_list = new BFT_Tickets_List($FilterStatus);
+				$events_list->prepare_items();
+				$events_list->display();
+			?>
+			</form>
+		</div>
+		<?php
+	}
+	
+	public static function _tickets_page()
+	{
+		// Check user capabilities
+		if (!current_user_can('view_woocommerce_reports')) {
+			wp_die( __('You do not have sufficient permissions to access this page.') );
+		}
+		
+		// Process POST/GET actions
+		 self::_process_tickets_actions();
+		
+		self::print_tickets_page();
+	}
+	
+	
  }
  
  // Instantiate Balfolk tickets events tab class
