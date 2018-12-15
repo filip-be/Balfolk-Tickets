@@ -3,6 +3,10 @@
 /* Display event page
  */
 require_once 'event.php';
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
  
 class BFT_EventPage {
 	 /**
@@ -42,9 +46,16 @@ class BFT_EventPage {
 	}
 	
 	public static function event_tickets($atts) {
+		// Do not load shortcode for page preview & REST requests
+		if ( is_admin()
+			|| (defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE)
+			|| (defined( 'REST_REQUEST' ) && REST_REQUEST))
+		{
+			return;
+		}
 		$res = '';
 		wp_enqueue_script('bftEventPageScript', plugins_url('public/js/event-tickets.js', dirname(__FILE__)));
-				
+		
 		wc_print_notices();
 		
 		$a = shortcode_atts( array(
