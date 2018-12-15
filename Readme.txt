@@ -2,8 +2,8 @@
 Contributors: filipbe
 Tags: balfolk, ticketing, tickets, event, bal folk
 Requires at least: 4.7
-Tested up to: 4.9.4
-Stable tag: 4.9.4
+Tested up to: 5.0.1
+Stable tag: 5.0.1
 Requires PHP: 5.6.32
 License: GNU General Public License v3.0
 License URI: https://www.gnu.org/licenses/gpl-3.0.en.html
@@ -35,6 +35,13 @@ Additional supported plugins:
 3. Update the string translations if required (Languages -> Strings translations)
 
 == Changelog ==
+
+= 1.1.10 =
+* Tested with WP 5.0.1
+* Bug fix: Fix errors for REST requests (page update failure in Gutenberg previews)
+
+= 1.1.9 =
+* Added admin view to manage tickets
 
 = 1.1.8 =
 * Remove product link from cart
