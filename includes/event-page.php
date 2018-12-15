@@ -132,7 +132,7 @@ class BFT_EventPage {
 					
 				if($stillAvailable)
 				{
-					$res .= '<div class="bft-et-td prod-cart"><button type="submit" name="add-to-cart" value="'.$originalProductId.'" class="single_add_to_cart_button button alt">'.pll__('BFTAddToCart').'</button></div>';
+					$res .= '<div class="bft-et-td prod-cart"><button type="submit" name="add-to-cart" value="'.$product->get_id().'" class="single_add_to_cart_button button alt">'.pll__('BFTAddToCart').'</button></div>';
 				}
 				else
 				{

@@ -26,7 +26,7 @@ Required plugins:
 
 Additional supported plugins:
 *	Product Open Pricing (Name Your Price) for WooCommerce (not working together with Hyyan WooCommerce Polylang Integration)
-*	Hyyan WooCommerce Polylang Integration (not working together with Product Open Pricing (Name Your Price) for WooCommerce)
+*	Hyyan WooCommerce Polylang Integration (not working together with Product Open Pricing (Name Your Price) for WooCommerce). WARNING: Hyyan WooCommerce Polylang Integration Stock Sync must be disabled!
 
 == Installation ==
 
@@ -35,6 +35,9 @@ Additional supported plugins:
 3. Update the string translations if required (Languages -> Strings translations)
 
 == Changelog ==
+
+= 1.2.0 =
+* Custom stock management (WARNING: Hyyan WooCommerce Polylang Integration Stock Sync must be disabled)
 
 = 1.1.10 =
 * Tested with WP 5.0.1
