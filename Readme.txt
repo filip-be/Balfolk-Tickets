@@ -36,6 +36,9 @@ Additional supported plugins:
 
 == Changelog ==
 
+= 1.2.1 =
+* Ordering event tickets by product publish date
+
 = 1.2.0 =
 * Custom stock management (WARNING: Hyyan WooCommerce Polylang Integration Stock Sync must be disabled)
 
