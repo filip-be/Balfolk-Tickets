@@ -172,7 +172,7 @@ class BFT_EventPage {
 	protected static function get_product_or_variation_parent_id( $_product ) {
 		return ( $_product->is_type( 'variation' ) ? $_product->get_parent_id() : $_product->get_id() );
 	}
- }
+}
  
- // Instantiate Balfolk tickets events page class
+// Instantiate Balfolk tickets events page class
 $BFT_EventPage = BFT_EventPage::getInstance();
