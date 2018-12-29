@@ -138,26 +138,11 @@ class BFT_Tickets_List extends WP_List_Table {
 	 * @return null|string
 	 */
 	protected function record_count() {
-		// Query WooCommerce for all order ID's
-		$query = new WC_Order_Query( array(
-			'limit' => -1,
-			'orderby' => 'date',
-			'order' => 'DESC',
-			'return' => 'ids',
-		) );
-		$orderIDs = $query->get_orders();
+		// Get tickets including all filters
+		$ticktes = $this->get_tickets(PHP_INT_MAX, 1);
 		
-		$ticketsCount = 0;
-		// Loop orders IDs
-		foreach($orderIDs as $orderId)
-		{
-			// Get by order id
-			$order = BFT_Order::GetByID($orderId);
-			
-			$ticketsCount += count($order->Tickets);
-		}
-
-		return $ticketsCount;
+		// Return tickets count
+		return count($ticktes);
 	}
 	
 	/**
@@ -222,10 +207,11 @@ class BFT_Tickets_List extends WP_List_Table {
 			}
 		}
 		
-		$status_filter = $_POST['tickets-filter-status'];
+		$ticket_status_filter = $_POST['tickets-filter-status'];
 		$products_filter = $_POST['ticket-name'];
+		$order_status_filter = $_POST['order-filter-status'];
 		
-		return array_filter($bftTickets, function($ticket) use ($status_filter, $products_filter)
+		$tickets = array_filter($bftTickets, function($ticket) use ($ticket_status_filter, $products_filter, $order_status_filter)
 		{
 			return
 				(
@@ -234,11 +220,20 @@ class BFT_Tickets_List extends WP_List_Table {
 				)
 				&&
 				(
-					empty($status_filter) 
-					|| $status_filter == -1
-					|| $status_filter == $ticket['status']
+					empty($ticket_status_filter) 
+					|| $ticket_status_filter == -1
+					|| $ticket_status_filter == $ticket['status']
+				)
+				&&
+				(
+					empty($order_status_filter) 
+					|| $order_status_filter == -1
+					|| $order_status_filter == 'wc-' . $ticket['orderStatus']
 				);
 		});
+		
+		$offset = ($page_numer - 1) * $per_page;
+		return array_slice($tickets, $offset, $per_page);
 	}
 	
 	function extra_tablenav( $which ) {
@@ -246,10 +241,23 @@ class BFT_Tickets_List extends WP_List_Table {
 			?>
 			<div class="alignleft actions">
 				<select name="tickets-filter-status">
-					<option value="-1" <?php echo (isset($_POST["tickets-filter-status"]) && $_POST["tickets-filter-status"] == -1) ? "selected" : "";?> >Status:</option>
+					<option value="-1" <?php echo (isset($_POST["tickets-filter-status"]) && $_POST["tickets-filter-status"] == -1) ? "selected" : "";?> >Ticket status</option>
 					<option value="0" <?php echo (isset($_POST["tickets-filter-status"]) && $_POST["tickets-filter-status"] == 0) ? "selected" : "";?> >All</option>
 					<option value="1"<?php echo (isset($_POST["tickets-filter-status"]) && $_POST["tickets-filter-status"] == 1) ? "selected" : "";?> >New</option>
 					<option value="2"<?php echo (isset($_POST["tickets-filter-status"]) && $_POST["tickets-filter-status"] == 2) ? "selected" : "";?> >Checked</option>
+				</select>
+			</div>
+			<div class="alignleft actions">
+				<select name="order-filter-status">
+					<option value="-1" <?php echo (isset($_POST["order-filter-status"]) && $_POST["order-filter-status"] == -1) ? "selected" : "";?> >Order status</option>
+				<?php
+					$wc_order_statuses = wc_get_order_statuses();
+					foreach($wc_order_statuses as $status_key => $order_status)
+					{?>
+						<option value="<?php echo $status_key; ?>" <?php echo (isset($_POST["order-filter-status"]) && $_POST["order-filter-status"] == $status_key) ? "selected" : "";?> ><?php echo $order_status; ?></option>
+					 <?php
+					}
+				?>
 				</select>
 				<input type="submit" name="tickets-filter-action" class="button" value="Filter"/>
 			</div>
@@ -280,7 +288,7 @@ class BFT_Tickets_List extends WP_List_Table {
 			$sortable
 		);
 
-		$per_page     = $this->get_items_per_page( 'events_per_page', -1 );
+		$per_page     = $this->get_items_per_page( 'tickets_per_page', 20 );
 		$current_page = $this->get_pagenum();
 		$total_items  = $this->record_count();
 
@@ -290,7 +298,5 @@ class BFT_Tickets_List extends WP_List_Table {
 		] );
 		
 		$this->items = $this->get_tickets($per_page, $current_page);
-		
-		// $this->items = $this->get_events($per_page, $current_page);
 	}
 }
