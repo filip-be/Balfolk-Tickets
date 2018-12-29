@@ -2,8 +2,8 @@
 Contributors: filipbe
 Tags: balfolk, ticketing, tickets, event, bal folk
 Requires at least: 4.7
-Tested up to: 5.0.1
-Stable tag: 5.0.1
+Tested up to: 5.0.2
+Stable tag: 5.0.2
 Requires PHP: 5.6.32
 License: GNU General Public License v3.0
 License URI: https://www.gnu.org/licenses/gpl-3.0.en.html
@@ -35,6 +35,9 @@ Additional supported plugins:
 3. Update the string translations if required (Languages -> Strings translations)
 
 == Changelog ==
+
+= 1.2.2 =
+* Additional filtering and summary for the "View tickets" page
 
 = 1.2.1 =
 * Ordering event tickets by product publish date

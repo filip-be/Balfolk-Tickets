@@ -22,14 +22,8 @@ class BFT_EventTab {
 	private function __construct() {
 		if(is_admin()) {
 			add_action('admin_menu', array(__CLASS__, '_create_events_menu'));
+			add_filter( 'set-screen-option', array( __CLASS__, '_tickets_save_options' ), 10, 3);
 		}
-		// add_action		( 'plugins_loaded', 					array( $this, 'textdomain'				) 			);
-		// add_action		( 'admin_enqueue_scripts',				array( $this, 'admin_scripts'			)			);
-		// add_action		( 'do_meta_boxes',						array( $this, 'create_metaboxes'		),	10,	2	);
-		// add_action		( 'save_post',							array( $this, 'save_custom_meta'		),	1		);
-		// front end
-		// add_action		( 'wp_enqueue_scripts',					array( $this, 'front_scripts'			),	10		);
-		// add_filter		( 'comment_form_defaults',				array( $this, 'custom_notes_filter'		) 			);
 	}
 	
 	/**
@@ -66,7 +60,7 @@ class BFT_EventTab {
 		);
 		
 		
-		add_submenu_page(
+		$ticketsHook = add_submenu_page(
 			'balfolk-events'
 			,'View tickets'
 			,'View tickets'
@@ -74,6 +68,11 @@ class BFT_EventTab {
 			,'balfolk-events-export'
 			,array( __CLASS__, '_tickets_page')
 		);
+		
+		
+		add_action( "load-$ticketsHook", array( __CLASS__, '_tickets_add_options') );
+		
+		// add_filter( 'set-screen-option', array( __CLASS__, '_tickets_save_options'), 10, 3 );
 	}
 	
 	protected static function _process_events_actions($field_event_name) {
@@ -353,6 +352,8 @@ class BFT_EventTab {
 					$FilterStatus = $_POST["events-filter"];
 				}
 				
+				
+				
 				$events_list = new BFT_Tickets_List($FilterStatus);
 				$events_list->prepare_items();
 				$events_list->display();
@@ -370,12 +371,30 @@ class BFT_EventTab {
 		}
 		
 		// Process POST/GET actions
-		 self::_process_tickets_actions();
+		self::_process_tickets_actions();
 		
 		self::print_tickets_page();
 	}
 	
+	public static function _tickets_add_options()
+	{
+		$per_page_args = array (
+			'label'		=> __('Tickets per page', 'bft-event'),
+			'default'	=> 20,
+			'option'	=> 'tickets_per_page'
+		);
+		add_screen_option( 'per_page', $per_page_args );
+	}
 	
+	public static function _tickets_save_options($status, $option, $value)
+	{
+		if( $option == 'tickets_per_page' )
+		{
+			return $value;
+		}
+		
+		return $status;
+	}
  }
  
  // Instantiate Balfolk tickets events tab class
