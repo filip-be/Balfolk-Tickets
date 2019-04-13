@@ -28,17 +28,45 @@ class BFT_Event_Tickets_List extends WP_List_Table {
 		$this->EventID = $_event_id;
 		$this->EventTicketsOnly = $_event_tickets_only;
 	}
-
-	protected function get_tickets_query($count) {
+	
+	protected function get_wp_products($per_page = 0, $page_number = 1) {
 		global $wpdb;
-		$sql = "SELECT ".($count ? "COUNT(*)" : "p.*")." FROM {$wpdb->prefix}posts p ";
-		$sql .= "WHERE p.post_type = 'product' ";
-		$sql .= "AND ";
-		if(!$this->EventTicketsOnly) {
-			$sql .= "NOT ";
+		
+		// Get product IDs for this event
+		$eventTicketsQuery = "SELECT t.FK_ProductID FROM {$wpdb->prefix}bft_ticket t WHERE t.FK_EventID = {$this->EventID} AND t.Status = 1";
+		
+		$eventTickets = $wpdb->get_results( $eventTicketsQuery, 'ARRAY_A' );
+		
+		// Post query filters
+		$filters = array(
+			'post_type' => 'product',
+			'lang' => pll_default_language('slug')
+		);
+		
+		if($per_page != 0 ) {
+			$filters['offset'] = ( $page_number - 1 ) * $per_page;
+			$filters['posts_per_page'] = $per_page;
 		}
-		$sql .= " EXISTS(SELECT 1 FROM {$wpdb->prefix}bft_ticket t WHERE t.FK_ProductID = p.ID AND t.FK_EventID = {$this->EventID} AND t.Status = 1)";
-		return $sql;
+		
+		// Order by query
+		if ( ! empty( $_REQUEST['orderby'] ) ) {
+			$filters['orderby'] = esc_sql( $_REQUEST['orderby'] );
+			$filters['order'] = ! empty( $_REQUEST['order'] ) ? ' ' . esc_sql( $_REQUEST['order'] ) : ' ASC';
+		}
+		
+		// Get posts (products)
+		$posts = get_posts( $filters );
+		
+		// Filter products matching this event
+		$products = array();
+		foreach($posts as $post) {
+			// XNOR operation
+			if(!(in_array(array('FK_ProductID' => $post->ID), $eventTickets) 
+					xor $this->EventTicketsOnly)) {
+				array_push($products, $post->to_array());
+			}
+		}
+		return $products;
 	}
 
 	/**
@@ -50,21 +78,7 @@ class BFT_Event_Tickets_List extends WP_List_Table {
 	 * @return mixed
 	 */
 	protected function get_tickets($per_page = 20, $page_number = 1 ) {
-		global $wpdb;
-
-		$sql = $this->get_tickets_query(false);
-
-		if ( ! empty( $_REQUEST['orderby'] ) ) {
-			$sql .= ' ORDER BY ' . esc_sql( $_REQUEST['orderby'] );
-			$sql .= ! empty( $_REQUEST['order'] ) ? ' ' . esc_sql( $_REQUEST['order'] ) : ' ASC';
-		}
-
-		$sql .= " LIMIT $per_page";
-		$sql .= ' OFFSET ' . ( $page_number - 1 ) * $per_page;
-
-		$result = $wpdb->get_results( $sql, 'ARRAY_A' );
-		
-		return $result;
+		return $this->get_wp_products($per_page, $page_number);
 	}
 
 	/**
@@ -73,11 +87,9 @@ class BFT_Event_Tickets_List extends WP_List_Table {
 	 * @return null|string
 	 */
 	protected function record_count() {
-		global $wpdb;
+		$products = $this->get_wp_products();
 
-		$sql = $this->get_tickets_query(true);
-
-		return $wpdb->get_var( $sql );
+		return sizeof($products);
 	}
 
 	/** Text displayed when no customer data is available */

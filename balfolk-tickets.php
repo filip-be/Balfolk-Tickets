@@ -3,26 +3,26 @@
 Plugin Name: Balfolk Tickets
 Plugin URI:  https://github.com/filip-be/Balfolk-Tickets
 Description: WordPress ticketing plugin for balfolk events
-Version:     1.2.2
+Version:     1.2.3
 Author:      Filip Bieleszuk
 Author URI:  https://github.com/filip-be
 License:     GPL3
 License URI: https://www.gnu.org/licenses/gpl-3.0.en.html
 
-	Copyright 2017 Filip Bieleszuk
+	Copyright 2017-2019 Filip Bieleszuk
 	
-	{Plugin Name} is free software: you can redistribute it and/or modify
+	Balfolk Tickets is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
 	any later version.
 	 
-	{Plugin Name} is distributed in the hope that it will be useful,
+	Balfolk Tickets is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 	GNU General Public License for more details.
 	 
 	You should have received a copy of the GNU General Public License
-	along with {Plugin Name}. If not, see {License URI}.
+	along with Balfolk Tickets. If not, see https://www.gnu.org/licenses/gpl-3.0.en.html.
 */
 
 class BFT
