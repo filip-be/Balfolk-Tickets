@@ -94,7 +94,7 @@ JOIN wp_bft_order_ticket allTicket ON allTicket.FK_TicketID = t.PK_ID
 JOIN wp_posts tp ON tp.ID = allTicket.FK_OrderId
 WHERE
 	EXISTS(SELECT 1 FROM wp_bft_order_ticket ot WHERE ot.FK_TicketID = t.PK_ID)
-    AND tp.post_status IN (''wc-completed'')
+    AND tp.post_status IN (\'wc-completed\')
 GROUP BY
 	e.Name,
     p.post_title
