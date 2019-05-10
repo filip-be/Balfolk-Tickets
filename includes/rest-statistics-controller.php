@@ -81,7 +81,7 @@ class BFT_REST_Statistics_Controller extends WP_REST_Controller {
     (
 		SELECT 
 			COUNT(checkedTicket.PK_ID)
-		FROM wp_bft_order_ticket checkedTicket 
+		FROM wp_bft_order_ticket checkedTicket
         WHERE
 			checkedTicket.FK_TicketID = t.PK_ID 
             AND checkedTicket.Status = 2
@@ -91,8 +91,10 @@ FROM wp_bft_ticket t
 JOIN wp_bft_event e ON e.PK_ID = t.FK_EventID
 JOIN wp_posts p ON p.ID = t.FK_ProductID
 JOIN wp_bft_order_ticket allTicket ON allTicket.FK_TicketID = t.PK_ID
+JOIN wp_posts tp ON tp.ID = allTicket.FK_OrderId
 WHERE
 	EXISTS(SELECT 1 FROM wp_bft_order_ticket ot WHERE ot.FK_TicketID = t.PK_ID)
+    AND tp.post_status IN (''wc-completed'')
 GROUP BY
 	e.Name,
     p.post_title
