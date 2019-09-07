@@ -3,7 +3,7 @@
 Plugin Name: Balfolk Tickets
 Plugin URI:  https://github.com/filip-be/Balfolk-Tickets
 Description: WordPress ticketing plugin for balfolk events
-Version:     1.2.4
+Version:     1.3.0
 Author:      Filip Bieleszuk
 Author URI:  https://github.com/filip-be
 License:     GPL3
@@ -47,11 +47,12 @@ class BFT
 		}
 		
 		// Load additional classes
-		self::loadClasses('includes', array('db-schema.php', 'events-tab.php', 'event-page.php', 'order.php', 'rest-orders-controller.php', 'rest-tickets-controller.php', 'rest-events-controller.php', 'rest-statistics-controller.php', 'product-stock.php'));
+		self::loadClasses('includes', array('db-schema.php', 'events-tab.php', 'event-page.php', 'order.php', 'rest-orders-controller.php', 'rest-tickets-controller.php', 'rest-events-controller.php', 'rest-statistics-controller.php', 'product-stock.php', 'options.php'));
 		
 		// Load style for admin pages
 		if(is_admin()) {
 			add_action('admin_head', array($this, 'add_admin_styles'));
+			
 		}
 		
 		// Polylang strings translation
@@ -202,15 +203,21 @@ class BFT
 		if(!$sent_to_admin && $order->get_status() == 'completed') {
 			$order_hash = htmlspecialchars($order->get_order_key());
 			echo '<p style="float: right"><img src="https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl='.$order_hash.'&chld=Q|3"/></p>';
-						
+			# Order completed message			
 			echo '<p>'.pll__('BFTOrderCompletedText').'</p>';
-			
-			
+			# Ticket link
 			echo '<p>';
 			echo pll__('BFTTicketGeneratorText');
 			echo ' <a href="'.pll__('BFTTicketGeneratorURI').'?id='.$order->get_order_key().'">';
 			echo pll__('BFTDownloadTicketText');
 			echo '</a></p>';
+			# Additional message
+			$additionalMessage = get_post_meta($order->get_id(), 'BFT Custom Product Additional Check');
+			if(!empty($additionalMessage)) {
+				echo '<p>';
+				echo pll__('BFTCustomProductCheckEmailMessage');
+				echo '</p>';
+			}
 		}
 	}
 	
@@ -315,6 +322,20 @@ class BFT
 				'required'  => true,
 			), $checkout->get_value( 'bft_additional_check' ));
 		}
+		
+		$lookupProductIds = explode(',', get_option('bft_products_ids_custom_checkbox', '0'));
+		$cartProductIds = array_column(WC()->cart->get_cart_contents(), 'product_id');
+		$productsIntersection = array_intersect($lookupProductIds, $cartProductIds);
+		
+		if(pll__('BFTAdditionalAgree') != 'BFTAdditionalAgree'
+			&& !empty($productsIntersection)) {
+				woocommerce_form_field( 'bft_custom_product_additional_check', array(
+					'type'          => 'checkbox',
+					'class'         => array('input-checkbox'),
+					'label'         => pll__('BFTCustomProductCheckMessage'),
+					'required'  => false,
+				), $checkout->get_value( 'bft_custom_product_additional_check' ));
+		}
 	}
 	
 	public function wc_checkout_process() {
@@ -329,6 +350,8 @@ class BFT
 	public function wc_checkout_update_meta( $order_id ) {
 		if ($_POST['bft_additional_check']) 
 			update_post_meta( $order_id, 'BFT Additional Check', 1 );
+		if (isset($_POST['bft_custom_product_additional_check']) && $_POST['bft_custom_product_additional_check']) 
+			update_post_meta( $order_id, 'BFT Custom Product Additional Check', 1 );
 	}
 	
 	public function wc_remove_permalink_order_table($name, $item, $order ) {
@@ -348,6 +371,8 @@ class BFT
 		pll_register_string('bft_order_additional_agree_missing', 'BFTAdditionalAgreeMissing', 'Bal Folk Tickets');
 		pll_register_string('bft_product_not_available', 'BFTProductNotAvailable', 'Bal Folk Tickets');
 		pll_register_string('bft_product_add_to_card', 'BFTAddToCart', 'Bal Folk Tickets');
+		pll_register_string('bft_custom_product_check_message', 'BFTCustomProductCheckMessage', 'Bal Folk Tickets');
+		pll_register_string('bft_custom_product_check_email_message', 'BFTCustomProductCheckEmailMessage', 'Bal Folk Tickets');
 	}
 	
 /// end class
